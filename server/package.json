@@ -1,0 +1,17 @@
+{
+  "name": "astitva-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Express backend for the Astitva portfolio",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.1"
+  }
+}
