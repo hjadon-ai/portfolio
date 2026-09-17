@@ -14,11 +14,11 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review signup, login, session restoration, the sample local-profile layout, and logout. No portfolio content API is connected yet.
+Review signup email verification, the unverified-account guidance page, and the existing authenticated profile. No portfolio content API is connected yet.
 
 ## Run locally
 
-1. Start MongoDB and the Express server first.
+1. Start MongoDB, Mailpit, and the Express server first.
 2. From this folder, run `npm install` once.
 3. Run `npm run dev`.
 4. Open `http://localhost:3000`.

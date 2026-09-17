@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: Astitva API
-  version: 0.2.0
+  version: 0.3.0
   description: Local REST API for the Astitva portfolio.
 
 servers:
@@ -30,7 +30,7 @@ paths:
   /api/auth/signup:
     post:
       tags: [Authentication]
-      summary: Create a local account
+      summary: Create an unverified local account and send a verification email
       operationId: signup
       requestBody:
         required: true
@@ -40,15 +40,77 @@ paths:
               $ref: "#/components/schemas/SignupRequest"
       responses:
         "201":
-          description: Account created.
+          description: Account created. Email delivery success is reported separately.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/SignupResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
         "409":
           description: An account with the email already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/verify-email:
+    post:
+      tags: [Authentication]
+      summary: Verify an email address with a single-use token
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailRequest"
+      responses:
+        "200":
+          description: Email verified.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: The email is already verified.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "410":
+          description: The token is invalid, expired, or already used.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/resend-verification:
+    post:
+      tags: [Authentication]
+      summary: Replace and resend the logged-in user's verification token
+      operationId: resendVerification
+      security:
+        - sessionCookie: []
+      responses:
+        "202":
+          description: A replacement verification email was accepted for delivery.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: The email is already verified.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Local email delivery failed and the account remains unverified.
           content:
             application/json:
               schema:
@@ -174,7 +236,7 @@ components:
 
     User:
       type: object
-      required: [id, name, email]
+      required: [id, name, email, emailVerified]
       properties:
         id:
           type: string
@@ -183,6 +245,43 @@ components:
         email:
           type: string
           format: email
+        emailVerified:
+          type: boolean
+
+    VerifyEmailRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          pattern: "^[a-fA-F0-9]{64}$"
+
+    SignupResponse:
+      type: object
+      required: [user, message, emailDelivered]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+        emailDelivered:
+          type: boolean
+
+    VerificationResponse:
+      type: object
+      required: [message, user]
+      properties:
+        message:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
 
     UserResponse:
       type: object

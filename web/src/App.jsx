@@ -43,7 +43,7 @@ function AuthPanel({ mode, onModeChange, onAuthenticated }) {
       });
 
       if (isSignup) {
-        setMessage('Account created. You can now log in.');
+        setMessage(result.message);
         setForm({ ...emptyForm, email: form.email });
         onModeChange('login');
       } else {
@@ -105,6 +105,76 @@ function AuthPanel({ mode, onModeChange, onAuthenticated }) {
       </form>
       {message && <p className="form-message" role="status">{message}</p>}
     </aside>
+  );
+}
+
+function VerificationResult({ token }) {
+  const [state, setState] = useState({ status: 'loading', message: 'Checking your verification link…' });
+
+  useEffect(() => {
+    if (!token) {
+      setState({ status: 'error', message: 'This verification link is missing its token.' });
+      return;
+    }
+
+    apiRequest('/api/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token })
+    })
+      .then((result) => setState({ status: 'success', message: result.message }))
+      .catch((error) => setState({ status: 'error', message: error.message }));
+  }, [token]);
+
+  return (
+    <main className="verification-shell">
+      <section className="verification-card">
+        <p className="eyebrow">Email verification</p>
+        <h1>{state.status === 'success' ? 'Email verified.' : state.status === 'error' ? 'Link not accepted.' : 'One moment.'}</h1>
+        <p>{state.message}</p>
+        {state.status !== 'loading' && (
+          <a className="button primary link-button" href="/">Continue</a>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function VerificationRequired({ user, onLogout }) {
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function resend() {
+    setBusy(true);
+    setMessage('');
+    try {
+      const result = await apiRequest('/api/auth/resend-verification', { method: 'POST' });
+      setMessage(result.message);
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="verification-shell">
+      <section className="verification-card">
+        <p className="eyebrow">Verification required</p>
+        <h1>Check your email, {user.name}.</h1>
+        <p>
+          We sent a verification link to <strong>{user.email}</strong>. Verifying confirms that
+          you own this address and helps protect account recovery. Your profile will open after
+          verification.
+        </p>
+        <div className="verification-actions">
+          <button className="button primary" type="button" onClick={resend} disabled={busy}>
+            {busy ? 'Sending…' : 'Resend verification email'}
+          </button>
+          <button className="button quiet" type="button" onClick={onLogout}>Log out</button>
+        </div>
+        {message && <p className="form-message" role="status">{message}</p>}
+      </section>
+    </main>
   );
 }
 
@@ -212,8 +282,13 @@ export default function App() {
     setUser(null);
   }
 
+  const location = new URL(window.location.href);
+  if (location.pathname === '/verify-email') {
+    return <VerificationResult token={location.searchParams.get('token')} />;
+  }
+
   if (loading) return <div className="loading">Loading Astitva…</div>;
-  return user
-    ? <Profile user={user} onLogout={logout} />
-    : <PublicHome onAuthenticated={setUser} />;
+  if (!user) return <PublicHome onAuthenticated={setUser} />;
+  if (!user.emailVerified) return <VerificationRequired user={user} onLogout={logout} />;
+  return <Profile user={user} onLogout={logout} />;
 }
