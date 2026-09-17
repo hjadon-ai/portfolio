@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Mailpit receives signup and resend messages at http://localhost:8025. Postman keeps the login session cookie automatically.",
+    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Postman keeps the login session cookie automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -87,6 +87,43 @@
             "method": "POST",
             "header": [],
             "url": "{{baseUrl}}/api/auth/resend-verification"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/forgot-password"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"{{newPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "description": "Copy the token query parameter from the password-reset link shown in Mailpit."
           },
           "response": []
         },

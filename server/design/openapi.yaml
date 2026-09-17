@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: Astitva API
-  version: 0.3.0
+  version: 0.4.0
   description: Local REST API for the Astitva portfolio.
 
 servers:
@@ -158,6 +158,54 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/auth/forgot-password:
+    post:
+      tags: [Authentication]
+      summary: Request a password-reset email without revealing account eligibility
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "202":
+          description: Generic response returned for eligible, unknown, unverified, and rate-limited accounts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Replace a password using a single-use reset token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password changed and all active sessions invalidated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "410":
+          description: The token is invalid, expired, already used, or belongs to an unverified account.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /api/auth/logout:
     post:
       tags: [Authentication]
@@ -233,6 +281,27 @@ components:
           type: string
           format: password
           example: local-demo-password
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          example: developer@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+          pattern: "^[a-fA-F0-9]{64}$"
+        password:
+          type: string
+          format: password
+          minLength: 8
 
     User:
       type: object

@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
   emailVerifiedAt: {
     type: Date,
     default: null
+  },
+  passwordResetRequestTimestamps: {
+    type: [Date],
+    default: []
   }
 }, {
   timestamps: true

@@ -14,7 +14,7 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review signup email verification, the unverified-account guidance page, and the existing authenticated profile. No portfolio content API is connected yet.
+Review forgot-password requests, password reset, and the existing authentication flow. No portfolio content API is connected yet.
 
 ## Run locally
 

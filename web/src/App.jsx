@@ -18,7 +18,7 @@ async function apiRequest(path, options = {}) {
   return body;
 }
 
-function AuthPanel({ mode, onModeChange, onAuthenticated }) {
+function AuthPanel({ mode, onModeChange, onAuthenticated, onForgotPassword }) {
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -99,8 +99,55 @@ function AuthPanel({ mode, onModeChange, onAuthenticated }) {
             minLength="8"
           />
         </label>
+        {!isSignup && (
+          <button className="text-action" type="button" onClick={onForgotPassword}>
+            Forgot password?
+          </button>
+        )}
         <button className="button primary" type="submit" disabled={busy}>
           {busy ? 'Please wait…' : isSignup ? 'Create account' : 'Login'}
+        </button>
+      </form>
+      {message && <p className="form-message" role="status">{message}</p>}
+    </aside>
+  );
+}
+
+function ForgotPasswordPanel({ onBack }) {
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage('');
+    try {
+      const result = await apiRequest('/api/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      setMessage(result.message);
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <aside className="auth-panel" aria-labelledby="forgot-password-title">
+      <button className="text-action back-action" type="button" onClick={onBack}>← Back to login</button>
+      <p className="eyebrow">Account recovery</p>
+      <h2 id="forgot-password-title">Reset your password.</h2>
+      <p className="panel-copy">Enter your verified email address. If it is eligible, Mailpit will receive a reset link.</p>
+      <form onSubmit={submit}>
+        <label>
+          Email
+          <input name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+        </label>
+        <button className="button primary" type="submit" disabled={busy}>
+          {busy ? 'Sending…' : 'Send reset link'}
         </button>
       </form>
       {message && <p className="form-message" role="status">{message}</p>}
@@ -178,6 +225,69 @@ function VerificationRequired({ user, onLogout }) {
   );
 }
 
+function ResetPassword({ token }) {
+  const [password, setPassword] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const [state, setState] = useState({ status: 'form', message: '' });
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    if (!token) {
+      setState({ status: 'error', message: 'This reset link is missing its token.' });
+      return;
+    }
+    if (password !== confirmation) {
+      setState({ status: 'error', message: 'The passwords do not match.' });
+      return;
+    }
+
+    setBusy(true);
+    setState({ status: 'form', message: '' });
+    try {
+      const result = await apiRequest('/api/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, password })
+      });
+      setState({ status: 'success', message: result.message });
+    } catch (error) {
+      setState({ status: 'error', message: error.message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="verification-shell">
+      <section className="verification-card">
+        <p className="eyebrow">Password reset</p>
+        <h1>{state.status === 'success' ? 'Password changed.' : 'Choose a new password.'}</h1>
+        {state.status === 'success' ? (
+          <>
+            <p>{state.message}</p>
+            <a className="button primary link-button" href="/">Return to login</a>
+          </>
+        ) : (
+          <form className="reset-form" onSubmit={submit}>
+            <label>
+              New password
+              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength="8" required />
+            </label>
+            <label>
+              Confirm new password
+              <input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength="8" required />
+            </label>
+            <button className="button primary" type="submit" disabled={busy || !token}>
+              {busy ? 'Changing…' : 'Change password'}
+            </button>
+            {state.message && <p className="form-message" role="status">{state.message}</p>}
+          </form>
+        )}
+      </section>
+    </main>
+  );
+}
+
 function PublicHome({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
 
@@ -199,7 +309,16 @@ function PublicHome({ onAuthenticated }) {
             <h1>Making room for <em>possibility.</em></h1>
             <p className="lede">A local space for projects, ideas, and the work that shapes what comes next.</p>
           </div>
-          <AuthPanel mode={mode} onModeChange={setMode} onAuthenticated={onAuthenticated} />
+          {mode === 'forgot-password' ? (
+            <ForgotPasswordPanel onBack={() => setMode('login')} />
+          ) : (
+            <AuthPanel
+              mode={mode}
+              onModeChange={setMode}
+              onAuthenticated={onAuthenticated}
+              onForgotPassword={() => setMode('forgot-password')}
+            />
+          )}
         </section>
 
         <section id="work" className="content-section">
@@ -285,6 +404,9 @@ export default function App() {
   const location = new URL(window.location.href);
   if (location.pathname === '/verify-email') {
     return <VerificationResult token={location.searchParams.get('token')} />;
+  }
+  if (location.pathname === '/reset-password') {
+    return <ResetPassword token={location.searchParams.get('token')} />;
   }
 
   if (loading) return <div className="loading">Loading Astitva…</div>;
