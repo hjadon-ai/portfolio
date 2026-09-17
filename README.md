@@ -47,9 +47,10 @@ Git workflow:
 4. Run and review the feature locally.
 5. Commit the reviewed changes.
 6. Push only after explicit approval.
-7. Create a pull request and record its link in the feature index.
+7. The project owner creates the pull request manually; record its link in the feature index afterward.
 8. Merge after review, then mark the feature Done.
 
 Remote rule:
-- Do not initialize a remote, push a branch, create a pull request, or merge without an explicit request.
+- Do not initialize a remote, push a branch, or merge without an explicit request.
+- Pull requests are always created manually by the project owner. Do not create them on the project owner's behalf.
 - A request to build, proceed, or test authorizes local work only.

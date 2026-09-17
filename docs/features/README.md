@@ -21,4 +21,5 @@ This file is the current list of Astitva features.
 - The project owner approves scope and architecture decisions.
 - Keep one feature per Git branch when Git work begins.
 - Update this table when a status, branch, or pull request changes.
-- Do not push or create a pull request without explicit approval.
+- Do not push without explicit approval.
+- The project owner always creates pull requests manually. Record the link after it exists.
