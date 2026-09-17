@@ -16,7 +16,7 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review F003 local signup email verification through Mailpit. Portfolio APIs have not been added.
+Review F004 local forgot-password and password-reset behavior through Mailpit. Portfolio APIs have not been added.
 
 ## Run locally
 
@@ -26,4 +26,4 @@ Review F003 local signup email verification through Mailpit. Portfolio APIs have
 4. Run `npm start`.
 5. The API is available at `http://localhost:3001`.
 
-Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy the plain token from a Mailpit verification link into the environment's `verificationToken` value when testing the verification endpoint directly.
+Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy tokens from Mailpit links into `verificationToken` or `resetToken` when testing those endpoints directly.

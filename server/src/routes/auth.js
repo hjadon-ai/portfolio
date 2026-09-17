@@ -4,12 +4,17 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Session = require('../models/Session');
 const EmailVerificationToken = require('../models/EmailVerificationToken');
-const { sendVerificationEmail } = require('../services/email');
+const PasswordResetToken = require('../models/PasswordResetToken');
+const { sendPasswordResetEmail, sendVerificationEmail } = require('../services/email');
 
 const router = express.Router();
 const cookieName = 'astitva_session';
 const sessionDuration = 24 * 60 * 60 * 1000;
 const verificationDuration = 60 * 60 * 1000;
+const passwordResetDuration = 60 * 60 * 1000;
+const passwordResetWindow = 24 * 60 * 60 * 1000;
+const passwordResetLimit = 2;
+const forgotPasswordMessage = 'If an eligible account exists, a reset email has been sent.';
 
 function publicUser(user) {
   return {
@@ -28,6 +33,44 @@ async function createVerificationToken(user) {
     tokenHash: hashToken(token),
     userId: user._id,
     expiresAt: new Date(Date.now() + verificationDuration)
+  });
+
+  return token;
+}
+
+async function reservePasswordResetRequest(userId) {
+  const requestedAt = new Date();
+  const windowStart = new Date(requestedAt.getTime() - passwordResetWindow);
+  const recentRequests = {
+    $filter: {
+      input: { $ifNull: ['$passwordResetRequestTimestamps', []] },
+      as: 'requestTime',
+      cond: { $gte: ['$$requestTime', windowStart] }
+    }
+  };
+
+  const user = await User.findOneAndUpdate({
+    _id: userId,
+    $expr: { $lt: [{ $size: recentRequests }, passwordResetLimit] }
+  }, [{
+    $set: {
+      passwordResetRequestTimestamps: {
+        $concatArrays: [recentRequests, [requestedAt]]
+      }
+    }
+  }], { new: true, updatePipeline: true });
+
+  return { requestedAt, user };
+}
+
+async function createPasswordResetToken(user) {
+  const token = crypto.randomBytes(32).toString('hex');
+
+  await PasswordResetToken.deleteMany({ userId: user._id });
+  await PasswordResetToken.create({
+    tokenHash: hashToken(token),
+    userId: user._id,
+    expiresAt: new Date(Date.now() + passwordResetDuration)
   });
 
   return token;
@@ -185,6 +228,70 @@ router.post('/resend-verification', async (request, response) => {
   return response.status(202).json({
     message: 'A new verification email was sent. It expires in one hour.'
   });
+});
+
+router.post('/forgot-password', async (request, response) => {
+  const email = typeof request.body.email === 'string' ? request.body.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return response.status(400).json({ error: 'A valid email address is required.' });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user || !user.emailVerifiedAt) {
+    return response.status(202).json({ message: forgotPasswordMessage });
+  }
+
+  const reservation = await reservePasswordResetRequest(user._id);
+  if (!reservation.user) {
+    return response.status(202).json({ message: forgotPasswordMessage });
+  }
+
+  const token = await createPasswordResetToken(reservation.user);
+  try {
+    await sendPasswordResetEmail(reservation.user, token);
+  } catch (error) {
+    await Promise.all([
+      PasswordResetToken.deleteMany({ userId: reservation.user._id }),
+      User.updateOne(
+        { _id: reservation.user._id },
+        { $pull: { passwordResetRequestTimestamps: reservation.requestedAt } }
+      )
+    ]);
+    console.error('Unable to send password reset email:', error.message);
+  }
+
+  return response.status(202).json({ message: forgotPasswordMessage });
+});
+
+router.post('/reset-password', async (request, response) => {
+  const token = typeof request.body.token === 'string' ? request.body.token.trim() : '';
+  const password = typeof request.body.password === 'string' ? request.body.password : '';
+
+  if (!/^[a-f0-9]{64}$/i.test(token) || password.length < 8) {
+    return response.status(400).json({
+      error: 'A valid reset token and a password of at least 8 characters are required.'
+    });
+  }
+
+  const tokenHash = hashToken(token);
+  const reset = await PasswordResetToken.findOneAndDelete({
+    tokenHash,
+    expiresAt: { $gt: new Date() }
+  }).populate('userId');
+
+  if (!reset || !reset.userId || !reset.userId.emailVerifiedAt) {
+    await PasswordResetToken.deleteOne({ tokenHash });
+    return response.status(410).json({ error: 'This reset link is invalid, expired, or already used.' });
+  }
+
+  reset.userId.passwordHash = await bcrypt.hash(password, 12);
+  await reset.userId.save();
+  await Promise.all([
+    PasswordResetToken.deleteMany({ userId: reset.userId._id }),
+    Session.deleteMany({ userId: reset.userId._id })
+  ]);
+
+  return response.status(200).json({ message: 'Password changed successfully. Please log in.' });
 });
 
 router.post('/logout', async (request, response) => {

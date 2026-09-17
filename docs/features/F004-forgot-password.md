@@ -1,7 +1,7 @@
 # F004: Forgot password
 
-- **Status:** Proposed
-- **Branch:** Not created
+- **Status:** Review
+- **Branch:** `feature/F004-forgot-password`
 - **Pull request:** Not created
 
 ## Goal
@@ -13,7 +13,7 @@ Allow a user who has forgotten their password to request a secure reset email an
 1. The user selects **Forgot password** from the login form.
 2. The user submits their email address.
 3. The server returns the same confirmation response whether or not the account exists.
-4. If the account exists, the server creates a single-use reset token and sends a local email containing a reset link.
+4. If a verified account exists, the server creates a single-use reset token and sends a local email containing a reset link.
 5. The user opens the link in the local web application.
 6. The user enters and confirms a new password.
 7. The web application sends the reset token and new password to the server.
@@ -66,9 +66,10 @@ Responses:
 
 - `202`: Always return a generic message such as: `If an account exists, a reset email has been sent.`
 - `400`: Email is missing or malformed.
-- `429`: Too many reset requests, if request limiting is included.
 
 The response must not reveal whether the email exists.
+For an unverified account, return the same generic `202` response but do not create a token or send an email.
+For a verified account that has reached two requests in the rolling 24-hour window, return the same generic `202` response but do not create a token or send an email.
 
 ### Reset the password
 
@@ -105,6 +106,7 @@ Only the token hash is stored. The plain token appears only in the local reset l
 ### `users`
 
 The successful reset replaces `passwordHash` and updates `updatedAt`. The plain password is never stored.
+Store only the two most recent eligible reset-request timestamps needed for the rolling 24-hour limit.
 
 ### `sessions`
 
@@ -112,18 +114,17 @@ Decide whether all active sessions for the user are deleted after a successful r
 
 ## Architecture decisions
 
-The following decisions require project-owner approval before implementation:
-
-- Reuse the local email tool selected for F003.
-- Password-reset token lifetime.
-- Minimum password requirements.
-- Whether successful reset invalidates all active sessions.
-- Whether request limiting is required for the local version.
-- Whether password reset is allowed before email verification.
+- Reuse Mailpit, the local email tool selected for F003.
+- Password-reset tokens expire after one hour.
+- A successful password reset invalidates all active sessions for the user.
+- Limit password-reset email requests to two per account per rolling 24-hour period.
+- Keep the existing password rule: a minimum of 8 characters.
+- Unverified accounts cannot request or complete a password reset.
 
 ## Acceptance criteria
 
 - The forgot-password response does not reveal whether an account exists.
+- An unverified account receives the generic response but no reset token or email.
 - A registered user receives one local reset email.
 - The plain reset token is not stored in MongoDB.
 - A valid token changes the password once.
@@ -135,12 +136,16 @@ The following decisions require project-owner approval before implementation:
 
 ## Local verification
 
-Not implemented. Verification steps will be added after the architecture decisions are approved.
+Verified locally on 2026-09-16:
+
+- Unknown and unverified accounts received the same generic `202` response without reset email delivery.
+- A verified account received two reset emails; a third request returned the same response without another message.
+- The second reset request invalidated the first token.
+- A valid token changed the password and token reuse returned `410`.
+- The old password failed and the new password succeeded after reset.
+- Two active sessions were invalidated by the successful reset.
+- The React production build completed successfully.
 
 ## Open questions
 
-1. Should the reset token expire after 15 minutes, 1 hour, or 24 hours?
-2. Should a successful reset log the user out of every active session?
-3. Should the local version limit how often reset emails can be requested?
-4. Should an unverified account be allowed to reset its password?
-5. Should the password rule remain a minimum of 8 characters or become stronger?
+None. The scope and architecture decisions are approved for implementation.

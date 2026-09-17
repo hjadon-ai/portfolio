@@ -23,6 +23,11 @@ app.get('/api/health', (request, response) => {
 
 app.use('/api/auth', authRoutes);
 
+app.use((error, request, response, next) => {
+  console.error('Unhandled API error:', error.message);
+  response.status(500).json({ error: 'The server could not complete this request.' });
+});
+
 async function startServer() {
   await connectDatabase();
 

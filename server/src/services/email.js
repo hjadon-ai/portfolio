@@ -28,4 +28,22 @@ async function sendVerificationEmail(user, token) {
   });
 }
 
-module.exports = { sendVerificationEmail };
+async function sendPasswordResetEmail(user, token) {
+  const resetUrl = `${webUrl}/reset-password?token=${encodeURIComponent(token)}`;
+
+  await transporter.sendMail({
+    from: 'Astitva Local <no-reply@astitva.local>',
+    to: user.email,
+    subject: 'Reset your Astitva password',
+    text: [
+      `Hello ${user.name},`,
+      '',
+      'Use this link to choose a new password for your local Astitva account:',
+      resetUrl,
+      '',
+      'This link expires in one hour. If you did not request it, you can ignore this message.'
+    ].join('\n')
+  });
+}
+
+module.exports = { sendPasswordResetEmail, sendVerificationEmail };

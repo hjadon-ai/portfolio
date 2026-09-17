@@ -29,8 +29,8 @@ Current status:
 - The React web application runs locally on port 3000.
 - The Express server runs locally on port 3001.
 - MongoDB runs locally and uses the `astitva` database.
-- Health, signup, email verification, resend verification, login, current-user, and logout APIs are implemented and documented for Postman.
-- Signup, email verification, resend verification, login, profile-session restoration, and logout are connected to the local authentication APIs.
+- Health, signup, email verification, password reset, login, current-user, and logout APIs are implemented and documented for Postman.
+- Signup, email verification, password reset, login, profile-session restoration, and logout are connected to the local authentication APIs.
 - The authenticated profile area currently contains sample layout content only.
 
 Feature tracking:
