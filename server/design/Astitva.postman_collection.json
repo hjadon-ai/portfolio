@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Run Signup, Login, Current user, and Logout in order. Postman keeps the session cookie automatically.",
+    "description": "Requests for the local Astitva Express server. Mailpit receives signup and resend messages at http://localhost:8025. Postman keeps the login session cookie automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -54,11 +54,39 @@
           "response": []
         },
         {
+          "name": "Verify email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{verificationToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/verify-email",
+            "description": "Copy the token query parameter from the verification link shown in Mailpit."
+          },
+          "response": []
+        },
+        {
           "name": "Current user",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/auth/me"
+          },
+          "response": []
+        },
+        {
+          "name": "Resend verification email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/resend-verification"
           },
           "response": []
         },

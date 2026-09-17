@@ -16,13 +16,14 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review the MongoDB-backed authentication endpoints: signup, login, current user, and logout. Portfolio APIs have not been added.
+Review F003 local signup email verification through Mailpit. Portfolio APIs have not been added.
 
 ## Run locally
 
 1. Start MongoDB on `localhost:27017`.
-2. From this folder, run `npm install` once.
-3. Run `npm start`.
-4. The API is available at `http://localhost:3001`.
+2. Start Mailpit with SMTP on `localhost:1025` and its inbox on `http://localhost:8025`.
+3. From this folder, run `npm install` once.
+4. Run `npm start`.
+5. The API is available at `http://localhost:3001`.
 
-Import the collection and local environment from `design/` into Postman. Run Signup, Login, Current user, and Logout in that order so Postman can reuse the HTTP-only session cookie.
+Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy the plain token from a Mailpit verification link into the environment's `verificationToken` value when testing the verification endpoint directly.

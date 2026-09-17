@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
   passwordHash: {
     type: String,
     required: true
+  },
+  emailVerifiedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

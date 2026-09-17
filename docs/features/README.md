@@ -12,7 +12,7 @@ This file is the current list of Astitva features.
 | --- | --- | --- | --- | --- |
 | F001 | Local authentication | Done | Not created | Not created |
 | F002 | Local profile page | Review | Not created | Not created |
-| F003 | Signup email verification | Approved | Not created | Not created |
+| F003 | Signup email verification | Review | `feature/F003-signup-email-verification` | Not created |
 | F004 | Forgot password | Proposed | Not created | Not created |
 
 ## Rules

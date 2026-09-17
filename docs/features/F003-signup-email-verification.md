@@ -1,7 +1,7 @@
 # F003: Signup email verification
 
-- **Status:** Approved
-- **Branch:** Not created
+- **Status:** Review
+- **Branch:** `feature/F003-signup-email-verification`
 - **Pull request:** Not created
 
 ## Goal
@@ -145,7 +145,21 @@ Tokens expire after one hour. Delete the token after successful verification. Cr
 
 ## Local verification
 
-Not implemented. Local verification will use Mailpit's browser inbox at `http://localhost:8025`.
+1. Start MongoDB on port `27017`.
+2. Start Mailpit with SMTP on port `1025` and its inbox on port `8025`.
+3. Start the server and web application.
+4. Sign up, then open the message at `http://localhost:8025`.
+5. Open its verification link and log in to confirm the profile is available.
+
+Verified locally on 2026-09-16:
+
+- Signup delivered one message to Mailpit and returned an unverified user.
+- Login and current-user responses preserved the unverified state.
+- Resend delivered a replacement token and invalidated the earlier token.
+- A valid token verified the user; reuse returned `410`.
+- Two simultaneous uses produced one `200` and one `410`.
+- With Mailpit stopped, signup kept the account unverified and resend returned `503`.
+- The React production build completed successfully.
 
 ## Open questions
 
