@@ -53,3 +53,10 @@ Git workflow:
 Remote rule:
 - Do not initialize a remote, push a branch, create a pull request, or merge without an explicit request.
 - A request to build, proceed, or test authorizes local work only.
+
+ChatGPT brainstorming project:
+- Setup files are in `chatgpt-project/`.
+- Use that ChatGPT Project to brainstorm and produce copy-ready Codex feature prompts.
+- Keep repository implementation and Git actions in Codex under the workflow above.
+
+F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `docs/features/F005-daily-diet-tracking.md` for manual checks.

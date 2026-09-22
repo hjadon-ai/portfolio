@@ -15,3 +15,5 @@ This folder will hold the design documents for the Astitva backend.
 ## Current step
 
 Review the authentication API definition, Postman requests, local environment, and MongoDB collection design. Portfolio APIs are not defined yet.
+
+F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../../docs/features/F005-daily-diet-tracking.md` for manual checks.

@@ -14,6 +14,7 @@ This file is the current list of Astitva features.
 | F002 | Local profile page | Review | Not created | Not created |
 | F003 | Signup email verification | Review | `feature/F003-signup-email-verification` | Not created |
 | F004 | Forgot password | Review | `feature/F004-forgot-password` | Not created |
+| F005 | Daily diet tracking | Review | `feature/F005-daily-diet-tracking` | Not created |
 
 ## Rules
 

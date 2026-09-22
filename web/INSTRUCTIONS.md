@@ -24,3 +24,5 @@ Review forgot-password requests, password reset, and the existing authentication
 4. Open `http://localhost:3000`.
 
 Vite sends relative `/api` requests to the Express server at `http://127.0.0.1:3001` during local development.
+
+F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.
