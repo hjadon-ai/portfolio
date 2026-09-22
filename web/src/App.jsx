@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Diet from './Diet';
 
 const emptyForm = { name: '', email: '', password: '' };
 
@@ -342,19 +343,26 @@ function PublicHome({ onAuthenticated }) {
 }
 
 function Profile({ user, onLogout }) {
+  const [page, setPage] = useState(window.location.hash === '#diet' ? 'diet' : 'profile');
+  useEffect(() => {
+    const change = () => setPage(window.location.hash === '#diet' ? 'diet' : 'profile');
+    window.addEventListener('hashchange', change);
+    return () => window.removeEventListener('hashchange', change);
+  }, []);
   return (
     <main className="profile-shell">
       <aside className="profile-sidebar">
         <a className="brand light" href="#profile">Astitva<span>.</span></a>
         <nav aria-label="Profile navigation">
-          <a className="active" href="#profile">Overview</a>
+          <a className={page === 'profile' ? 'active' : ''} href="#profile">Overview</a>
+          <a className={page === 'diet' ? 'active' : ''} href="#diet">Diet</a>
           <a href="#projects">Projects</a>
           <a href="#notes">Notes</a>
         </nav>
         <button className="button sidebar-logout" type="button" onClick={onLogout}>Log out</button>
       </aside>
 
-      <section className="profile-content" id="profile">
+      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : <section className="profile-content" id="profile">
         <header className="profile-header">
           <div><p className="eyebrow">Local profile</p><h1>Good to see you, {user.name}.</h1></div>
           <div className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</div>
@@ -380,7 +388,7 @@ function Profile({ user, onLogout }) {
           <h2>Your private area starts here.</h2>
           <p>This is a sample layout. We can decide what real profile content belongs here next.</p>
         </section>
-      </section>
+      </section>}
     </main>
   );
 }

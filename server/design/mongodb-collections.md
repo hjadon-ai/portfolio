@@ -2,6 +2,12 @@
 
 Database: `astitva` on `mongodb://127.0.0.1:27017`
 
+## dietMeals and dietNutritionTargets (F005)
+
+`dietMeals` stores `userId`, `consumedOn` (YYYY-MM-DD), `name`, `mealType`, optional `servingDescription`, and numeric `calories`, `proteinGrams`, `carbohydrateGrams`, `fatGrams`, `fiberGrams`, plus timestamps. Index `(userId, consumedOn)` supports private daily queries.
+
+`dietNutritionTargets` stores one unique `userId`, the five nutrition targets, and timestamps. Targets apply to all dates, including past dates. Calories are whole numbers; grams have at most one decimal place. Meals allow zero; targets must be positive. Daily totals are calculated, not persisted.
+
 ## users
 
 Stores local accounts.

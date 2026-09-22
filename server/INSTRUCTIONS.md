@@ -27,3 +27,5 @@ Review F004 local forgot-password and password-reset behavior through Mailpit. P
 5. The API is available at `http://localhost:3001`.
 
 Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy tokens from Mailpit links into `verificationToken` or `resetToken` when testing those endpoints directly.
+
+F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.

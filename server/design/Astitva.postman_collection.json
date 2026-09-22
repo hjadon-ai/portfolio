@@ -137,6 +137,94 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Diet (verified login required)",
+      "item": [
+        {
+          "name": "Get day",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/diet/days/{{dietDate}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Add meal",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/meals",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{dietDate}}\",\n  \"name\": \"Oatmeal\",\n  \"mealType\": \"breakfast\",\n  \"servingDescription\": \"1 bowl\",\n  \"nutrition\": {\n    \"calories\": 420,\n    \"proteinGrams\": 18,\n    \"carbohydrateGrams\": 62,\n    \"fatGrams\": 12,\n    \"fiberGrams\": 8.5\n  }\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set(\"mealId\", pm.response.json().meal.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Edit meal",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nutrition\": {\n    \"fiberGrams\": 9.5\n  }\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save targets",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/diet/targets",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calories\": 2000,\n  \"proteinGrams\": 100,\n  \"carbohydrateGrams\": 240,\n  \"fatGrams\": 65,\n  \"fiberGrams\": 30\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete meal",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
+            "header": []
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
