@@ -14,7 +14,7 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review forgot-password requests, password reset, and the existing authentication flow. No portfolio content API is connected yet.
+Review F006 Personal Finance with the local Express server and Plaid Sandbox.
 
 ## Run locally
 
@@ -26,3 +26,5 @@ Review forgot-password requests, password reset, and the existing authentication
 Vite sends relative `/api` requests to the Express server at `http://127.0.0.1:3001` during local development.
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.
+
+F006 is ready for manual review: Finance is accessible from the verified profile and uses Plaid Link only for Sandbox account connection. Summary and account pages read synchronized local data. See `../docs/features/F006-personal-finance.md`.

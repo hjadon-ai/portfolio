@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Postman keeps the login session cookie automatically.",
+    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Finance uses Plaid Sandbox credentials configured only on the server. Postman keeps the login session cookie automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -220,6 +220,134 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Finance (verified login required)",
+      "item": [
+        {
+          "name": "Get Finance summary",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/summary?month={{financeMonth}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "List connections and accounts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/connections",
+            "header": []
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const body = pm.response.json(); if (body.connections[0]) { pm.environment.set(\"financeConnectionId\", body.connections[0].id); if (body.connections[0].accounts[0]) pm.environment.set(\"financeAccountId\", body.connections[0].accounts[0].id); } }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Plaid Link session",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/finance/connection-sessions",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Requires PLAID_CLIENT_ID, PLAID_SECRET, and FINANCE_TOKEN_ENCRYPTION_KEY on the local server. Open Plaid Link from the Finance page to use the returned temporary token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"plaid\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Plaid connection",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/finance/connections",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Paste a fresh short-lived public token from a Plaid Sandbox Link flow into plaidPublicToken. The web page normally performs this exchange automatically.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"plaid\",\n  \"exchangeToken\": \"{{plaidPublicToken}}\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set(\"financeConnectionId\", pm.response.json().connection.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh all Finance data",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/finance/sync",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get account detail",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/accounts/{{financeAccountId}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Stop tracking account",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/finance/accounts/{{financeAccountId}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Disconnect institution",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/finance/connections/{{financeConnectionId}}",
             "header": []
           },
           "response": []

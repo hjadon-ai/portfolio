@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: Astitva API
-  version: 0.4.0
+  version: 0.6.0
   description: Local REST API for the Astitva portfolio.
 
 servers:
@@ -12,8 +12,21 @@ servers:
 tags:
   - name: System
   - name: Authentication
+  - name: Finance
 
 paths:
+  /api/finance/summary:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1summary'
+  /api/finance/connections:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1connections'
+  /api/finance/connection-sessions:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1connection-sessions'
+  /api/finance/sync:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1sync'
+  /api/finance/accounts/{accountId}:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1accounts~1{accountId}'
+  /api/finance/connections/{connectionId}:
+    $ref: './finance.openapi.json#/paths/~1api~1finance~1connections~1{connectionId}'
   /api/diet/days/{date}:
     $ref: './diet.openapi.json#/paths/~1api~1diet~1days~1{date}'
   /api/diet/meals:

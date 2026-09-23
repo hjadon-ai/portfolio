@@ -16,7 +16,7 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review F004 local forgot-password and password-reset behavior through Mailpit. Portfolio APIs have not been added.
+Review F006 Personal Finance locally with Plaid Sandbox and localhost MongoDB.
 
 ## Run locally
 
@@ -26,6 +26,10 @@ Review F004 local forgot-password and password-reset behavior through Mailpit. P
 4. Run `npm start`.
 5. The API is available at `http://localhost:3001`.
 
+For Finance, copy `.env.example` to the ignored `.env` file. Add `PLAID_CLIENT_ID`, the Plaid Sandbox `PLAID_SECRET`, and a 32-byte `FINANCE_TOKEN_ENCRYPTION_KEY` before starting the server. The start command loads `.env` when it exists.
+
 Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy tokens from Mailpit links into `verificationToken` or `resetToken` when testing those endpoints directly.
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.
+
+F006 is ready for manual review: Finance uses Plaid Sandbox for connect/sync and stores the normalized result in local MongoDB. See `../docs/features/F006-personal-finance.md`.
