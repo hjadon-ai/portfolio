@@ -23,6 +23,7 @@ app.get('/api/health', (request, response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/diet', require('./routes/diet'));
+app.use('/api/finance', require('./routes/finance'));
 
 app.use((error, request, response, next) => {
   console.error('Unhandled API error:', error.message);

@@ -14,6 +14,8 @@ This folder will hold the design documents for the Astitva backend.
 
 ## Current step
 
-Review the authentication API definition, Postman requests, local environment, and MongoDB collection design. Portfolio APIs are not defined yet.
+Review the F006 Finance API definition, Postman requests, and MongoDB collection design with Plaid Sandbox.
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../../docs/features/F005-daily-diet-tracking.md` for manual checks.
+
+F006 is ready for manual review. `finance.openapi.json` defines the Finance endpoints and the Postman collection contains matching local requests.

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Diet from './Diet';
+import Finance from './Finance';
 
 const emptyForm = { name: '', email: '', password: '' };
 
@@ -343,9 +344,10 @@ function PublicHome({ onAuthenticated }) {
 }
 
 function Profile({ user, onLogout }) {
-  const [page, setPage] = useState(window.location.hash === '#diet' ? 'diet' : 'profile');
+  const pageFromHash = () => window.location.hash === '#diet' ? 'diet' : window.location.hash === '#finance' ? 'finance' : 'profile';
+  const [page, setPage] = useState(pageFromHash);
   useEffect(() => {
-    const change = () => setPage(window.location.hash === '#diet' ? 'diet' : 'profile');
+    const change = () => setPage(pageFromHash());
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
@@ -356,13 +358,14 @@ function Profile({ user, onLogout }) {
         <nav aria-label="Profile navigation">
           <a className={page === 'profile' ? 'active' : ''} href="#profile">Overview</a>
           <a className={page === 'diet' ? 'active' : ''} href="#diet">Diet</a>
+          <a className={page === 'finance' ? 'active' : ''} href="#finance">Finance</a>
           <a href="#projects">Projects</a>
           <a href="#notes">Notes</a>
         </nav>
         <button className="button sidebar-logout" type="button" onClick={onLogout}>Log out</button>
       </aside>
 
-      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : <section className="profile-content" id="profile">
+      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} /> : <section className="profile-content" id="profile">
         <header className="profile-header">
           <div><p className="eyebrow">Local profile</p><h1>Good to see you, {user.name}.</h1></div>
           <div className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</div>

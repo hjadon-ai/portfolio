@@ -31,7 +31,9 @@ Current status:
 - MongoDB runs locally and uses the `astitva` database.
 - Health, signup, email verification, password reset, login, current-user, and logout APIs are implemented and documented for Postman.
 - Signup, email verification, password reset, login, profile-session restoration, and logout are connected to the local authentication APIs.
-- The authenticated profile area currently contains sample layout content only.
+- The authenticated Overview tab currently contains sample layout content.
+- Daily diet tracking and the Plaid Sandbox-backed Finance section are available from the verified profile.
+- Finance reads synchronized data from local MongoDB; Plaid credentials and encrypted access tokens remain on the server.
 
 Feature tracking:
 - Keep the feature index in `docs/features/README.md`.
@@ -60,3 +62,5 @@ ChatGPT brainstorming project:
 - Keep repository implementation and Git actions in Codex under the workflow above.
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `docs/features/F005-daily-diet-tracking.md` for manual checks.
+
+F006 is ready for manual review on `feature/F006-personal-finance`. Configure the server from `server/.env.example`, then use Plaid Sandbox from the Finance page. See `docs/features/F006-personal-finance.md` for manual checks.
