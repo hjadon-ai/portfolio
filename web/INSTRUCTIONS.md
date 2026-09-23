@@ -14,7 +14,7 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review F011 visual consistency and responsive behavior across public, authentication, Overview, Diet, and Finance screens.
+Review F008 on the Diet screen: six targets and macro comparison, water intake, reusable Meal Library meals, quantity-scaled daily copies, and CSV preview/import.
 
 ## Run locally
 
@@ -32,3 +32,5 @@ F006 is ready for manual review: Finance is accessible from the verified profile
 F007 is ready for manual review: authenticated pages show the active profile, and Stage confirms before opening Plaid Production Link. See `../docs/features/F007-local-stage-environment.md`.
 
 F011 is ready for manual review: the React application uses semantic visual tokens, the shared presentation components under `src/ui/`, Lucide icons, and a responsive application shell. Existing feature behavior and API contracts remain unchanged. See `../docs/features/F011-application-visual-system.md`.
+
+F008 is ready for manual review: the existing Diet route contains daily targets, water tracking, manual meals, and an expandable Meal Library. CSV files are sent only to the local Express preview endpoint and are not stored by the browser.

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Finance uses the active Dev/Sandbox or Stage/Production credentials configured only on the server. Postman keeps the login session cookie automatically.",
+    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Diet includes F008 water tracking, Meal Library, and CSV preview/import. Finance uses the active Dev/Sandbox or Stage/Production credentials configured only on the server. Postman keeps the login session cookie automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -151,6 +151,72 @@
           "response": []
         },
         {
+          "name": "Save targets",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/diet/targets",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calories\": 2000,\n  \"proteinGrams\": 100,\n  \"carbohydrateGrams\": 240,\n  \"fatGrams\": 65,\n  \"fiberGrams\": 30,\n  \"waterMilliliters\": 2000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add water entry",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/water-entries",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{dietDate}}\",\n  \"amountMilliliters\": 250\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set(\"waterEntryId\", pm.response.json().entry.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete water entry",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/diet/water-entries/{{waterEntryId}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
           "name": "Add meal",
           "request": {
             "method": "POST",
@@ -198,10 +264,28 @@
           "response": []
         },
         {
-          "name": "Save targets",
+          "name": "Delete meal",
           "request": {
-            "method": "PUT",
-            "url": "{{baseUrl}}/api/diet/targets",
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "List library meals",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/diet/library-meals?search=&category=",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Create library meal",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/library-meals",
             "header": [
               {
                 "key": "Content-Type",
@@ -210,16 +294,141 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"calories\": 2000,\n  \"proteinGrams\": 100,\n  \"carbohydrateGrams\": 240,\n  \"fatGrams\": 65,\n  \"fiberGrams\": 30\n}"
+              "raw": "{\n  \"name\": \"Oatmeal bowl\",\n  \"category\": \"breakfast\",\n  \"servingDescription\": \"1 bowl\",\n  \"nutrition\": {\n    \"calories\": 420,\n    \"proteinGrams\": 18,\n    \"carbohydrateGrams\": 62,\n    \"fatGrams\": 12,\n    \"fiberGrams\": 8.5\n  },\n  \"ingredients\": \"Rolled oats; milk; berries\",\n  \"notes\": \"Usual weekday serving\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set(\"libraryMealId\", pm.response.json().meal.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get library meal",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/diet/library-meals/{{libraryMealId}}",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Edit library meal",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/diet/library-meals/{{libraryMealId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
         },
         {
-          "name": "Delete meal",
+          "name": "Add library meal to day",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/library-meals/{{libraryMealId}}/add-to-day",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{dietDate}}\",\n  \"mealType\": \"breakfast\",\n  \"quantity\": 1.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set(\"mealId\", pm.response.json().meal.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preview Meal Library CSV",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/library-meals/import-preview",
+            "header": [],
+            "description": "Choose a local UTF-8 CSV in the file field. Preview does not save records.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm selected CSV rows",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/diet/library-meals/import",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rows\": [\n    {\n      \"sourceRowNumber\": 2,\n      \"name\": \"Imported yogurt bowl\",\n      \"category\": \"breakfast\",\n      \"servingDescription\": \"1 bowl\",\n      \"calories\": 310,\n      \"proteinGrams\": 22,\n      \"carbohydrateGrams\": 38,\n      \"fatGrams\": 8,\n      \"fiberGrams\": 5,\n      \"ingredients\": \"Yogurt; berries; oats\",\n      \"notes\": \"\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete library meal",
           "request": {
             "method": "DELETE",
-            "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
+            "url": "{{baseUrl}}/api/diet/library-meals/{{libraryMealId}}",
             "header": []
           },
           "response": []

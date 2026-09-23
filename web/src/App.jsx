@@ -7,18 +7,24 @@ import { AppShell, Badge, Button, EnvironmentBanner, FormField, LoadingState, Pa
 const emptyForm = { name: '', email: '', password: '' };
 
 async function apiRequest(path, options = {}) {
+  const formData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const response = await fetch(path, {
     credentials: 'include',
     ...options,
     headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.body && !formData ? { 'Content-Type': 'application/json' } : {}),
       ...options.headers
     }
   });
 
   if (response.status === 204) return null;
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || 'Something went wrong.');
+  if (!response.ok) {
+    const details = body.error;
+    const error = new Error(typeof details === 'string' ? details : details?.message || 'Something went wrong.');
+    if (details && typeof details === 'object') Object.assign(error, { code: details.code, details });
+    throw error;
+  }
   return body;
 }
 

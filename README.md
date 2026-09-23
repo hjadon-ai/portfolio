@@ -32,7 +32,7 @@ Current status:
 - Health, signup, email verification, password reset, login, current-user, and logout APIs are implemented and documented for Postman.
 - Signup, email verification, password reset, login, profile-session restoration, and logout are connected to the local authentication APIs.
 - The authenticated Overview tab currently contains sample layout content.
-- Daily diet tracking and Finance are available from the verified profile. Dev uses Plaid Sandbox; Stage uses Plaid Production for real accounts.
+- Daily diet tracking and Finance are available from the verified profile. Diet includes six targets, water intake, reusable meals, and CSV preview/import. Dev uses Plaid Sandbox; Stage uses Plaid Production for real accounts.
 - Finance reads synchronized data from local MongoDB; Plaid credentials and encrypted access tokens remain on the server.
 
 Feature tracking:
@@ -82,3 +82,5 @@ Only one profile runs at a time on ports `3000` and `3001`. Stage remains local;
 F006 is ready for manual review. F007 adds the isolated local Stage profile and environment banner. See their feature documents in `docs/features/` for manual checks.
 
 F011 is ready for manual review on `feature/F011-application-visual-system`. It adds the shared light visual system, responsive application shell, Lucide icons, reusable presentation components, and consistent styling without changing API behavior.
+
+F008 is ready for manual review on `feature/F008-diet-targets-meal-library`. It extends Diet with the 4/4/9 macro comparison, daily water entries, a personal Meal Library, quantity-scaled historical snapshots, and explicit CSV preview/import.

@@ -16,7 +16,7 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review F007 local environment isolation with Dev/Sandbox and Stage/Production.
+Review F008 Diet targets, water tracking, Meal Library, and CSV preview/import on the existing local Dev profile.
 
 ## Run locally
 
@@ -35,3 +35,5 @@ F005 is ready for manual review: Diet is accessible from the verified profile, w
 F006 is ready for manual review: Finance uses Plaid Sandbox for connect/sync and stores the normalized result in local MongoDB. See `../docs/features/F006-personal-finance.md`.
 
 F007 is ready for manual review: the two profiles have isolated configuration, databases, cookies, and finance-provider environments. See `../docs/features/F007-local-stage-environment.md`.
+
+F008 is ready for manual review: Diet adds six daily targets, deterministic macro calories, reversible water entries, reusable meals, quantity-scaled daily snapshots, and two-step CSV import. See `../docs/features/F008-diet-targets-and-meal-library.md`.
