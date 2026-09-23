@@ -20,7 +20,7 @@ This file is the current list of Astitva features.
 | F008 | Diet targets and Meal Library | Approved | Not created | Not created |
 | F009 | [Daily Priorities](F009-daily-priorities.md) | Approved | Not created | Not created |
 | F010 | [Quick Notes](F010-quick-notes.md) | Approved | Not created | Not created |
-| F011 | [Application visual system](F011-application-visual-system.md) | Approved | Not created | Not created |
+| F011 | [Application visual system](F011-application-visual-system.md) | Review | `feature/F011-application-visual-system` | Not created |
 
 ## Rules
 

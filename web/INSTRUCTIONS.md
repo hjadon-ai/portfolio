@@ -14,7 +14,7 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review F007 environment labeling and Stage real-account confirmation with the local Express server.
+Review F011 visual consistency and responsive behavior across public, authentication, Overview, Diet, and Finance screens.
 
 ## Run locally
 
@@ -30,3 +30,5 @@ F005 is ready for manual review: Diet is accessible from the verified profile, w
 F006 is ready for manual review: Finance is accessible from the verified profile and uses Plaid Link only for Sandbox account connection. Summary and account pages read synchronized local data. See `../docs/features/F006-personal-finance.md`.
 
 F007 is ready for manual review: authenticated pages show the active profile, and Stage confirms before opening Plaid Production Link. See `../docs/features/F007-local-stage-environment.md`.
+
+F011 is ready for manual review: the React application uses semantic visual tokens, the shared presentation components under `src/ui/`, Lucide icons, and a responsive application shell. Existing feature behavior and API contracts remain unchanged. See `../docs/features/F011-application-visual-system.md`.

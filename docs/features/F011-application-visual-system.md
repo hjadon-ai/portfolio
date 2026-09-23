@@ -1,7 +1,7 @@
 # F011: Application visual system
 
-- **Status:** Approved
-- **Branch:** Not created
+- **Status:** Review
+- **Branch:** `feature/F011-application-visual-system`
 - **Pull request:** Not created
 
 ## Goal
@@ -358,7 +358,17 @@ These decisions were approved by the project owner:
 
 ## Local verification
 
-Documentation only; no implementation has been performed. After approval and implementation:
+Implemented locally on 2026-09-23. Completed checks:
+
+- The React production build passes with the shared UI layer and individually imported Lucide icons.
+- All 10 existing server tests pass, confirming F011 did not change server behavior.
+- `git diff --check` passes, and no server, OpenAPI, Postman, or MongoDB files changed.
+- The application retains the same authentication, Diet, Finance, environment-banner, API request, hash-navigation, and data-handling logic.
+- The CSS includes semantic tokens, the approved system font stack, responsive layouts for desktop/tablet/mobile, visible focus treatment, and reduced-motion handling.
+- The mobile drawer closes from its labelled close control, overlay, navigation selection, and Escape, then returns focus to the menu control.
+- Confirmation dialogs use labelled modal semantics, initial focus, keyboard focus containment, Escape handling, and focus return.
+
+Manual visual review remains:
 
 1. Run the existing local MongoDB, Express, Mailpit, and Vite services.
 2. Exercise public, signup, login, verification-required, verification-result, forgot-password, reset-password, authenticated Overview, Diet, and Finance screens.

@@ -80,3 +80,5 @@ Use independent 32-byte finance encryption keys. Then run one profile from the r
 Only one profile runs at a time on ports `3000` and `3001`. Stage remains local; browser Plaid Link and server requests to Plaid are its only external communication. Import the matching Dev or Stage Postman environment from `server/design/`.
 
 F006 is ready for manual review. F007 adds the isolated local Stage profile and environment banner. See their feature documents in `docs/features/` for manual checks.
+
+F011 is ready for manual review on `feature/F011-application-visual-system`. It adds the shared light visual system, responsive application shell, Lucide icons, reusable presentation components, and consistent styling without changing API behavior.
