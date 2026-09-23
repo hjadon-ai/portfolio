@@ -102,7 +102,7 @@ function AccountDetail({ accountId, apiRequest, busy, reloadKey, actionError, ac
   </section>;
 }
 
-export default function Finance({ apiRequest }) {
+export default function Finance({ apiRequest, runtime }) {
   const [month, setMonth] = useState(thisMonth);
   const [summary, setSummary] = useState(null);
   const [connections, setConnections] = useState([]);
@@ -151,6 +151,9 @@ export default function Finance({ apiRequest }) {
   }
 
   async function connect() {
+    if (runtime?.environment === 'stage' && !window.confirm(
+      'Stage connects to Plaid Production and can retrieve real financial data. Continue with a real account?'
+    )) return;
     await run('connect', async () => {
       const session = await apiRequest('/api/finance/connection-sessions', {
         method: 'POST',
@@ -209,7 +212,7 @@ export default function Finance({ apiRequest }) {
       <div><p className="eyebrow">Local financial view</p><h1>Finance.</h1></div>
       <div className="finance-actions">
         <button className="button" type="button" disabled={Boolean(busy)} onClick={refresh}>{busy === 'sync' ? 'Refreshing…' : 'Refresh'}</button>
-        <button className="button finance-connect" type="button" disabled={Boolean(busy)} onClick={connect}>{busy === 'connect' ? 'Opening Plaid…' : 'Connect account'}</button>
+        <button className="button finance-connect" type="button" disabled={Boolean(busy)} onClick={connect}>{busy === 'connect' ? 'Opening Plaid…' : runtime?.environment === 'stage' ? 'Connect real account' : 'Connect account'}</button>
       </div>
     </header>
     {error && <p className="form-message finance-notice" role="alert">{error}</p>}
@@ -226,7 +229,7 @@ export default function Finance({ apiRequest }) {
 
       <section className="finance-section">
         <div className="finance-section-heading"><div><p className="eyebrow">Connected locally</p><h2>Accounts</h2></div><span>{summary.accountCount} accounts · {summary.connectionCount} institutions</span></div>
-        {!connections.length && <div className="finance-empty"><h3>No accounts connected.</h3><p>Connect a Plaid Sandbox institution to create your local financial view. Plaid credentials and durable access tokens stay on the server.</p><button className="button" onClick={connect} disabled={Boolean(busy)}>Connect account</button></div>}
+        {!connections.length && <div className="finance-empty"><h3>No accounts connected.</h3><p>{runtime?.environment === 'stage' ? 'Connect a real institution through Plaid Production. Synchronized values stay in the separate local Stage database.' : 'Connect a Plaid Sandbox institution to create your local view with fake financial data.'} Plaid credentials and durable access tokens stay on the server.</p><button className="button" onClick={connect} disabled={Boolean(busy)}>{runtime?.environment === 'stage' ? 'Connect real account' : 'Connect account'}</button></div>}
         {connections.map((connection) => <article className="finance-connection" key={connection.id}>
           <header><div><h3>{connection.institutionName}</h3><p>{title(connection.status)} · Last synced {dateTime(connection.lastSuccessfulSyncAt)}</p></div>
             <button className="text-action" disabled={Boolean(busy)} onClick={() => disconnect(connection)}>Disconnect institution</button></header>

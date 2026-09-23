@@ -1,3 +1,3 @@
 # Server configuration
 
-MongoDB defaults to `mongodb://127.0.0.1:27017/astitva`. It can be overridden with the `MONGODB_URL` environment variable.
+Runtime configuration must pass through `runtime.js`. Dev is fixed to local database `astitva` and Plaid Sandbox. Stage is fixed to local database `astitva_stage` and Plaid Production. Do not accept arbitrary provider hosts or silent defaults.

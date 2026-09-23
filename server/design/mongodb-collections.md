@@ -1,10 +1,15 @@
 # MongoDB collections
 
-Database: `astitva` on `mongodb://127.0.0.1:27017`
+Databases on local MongoDB port `27017`:
+
+- Dev: `astitva`
+- Stage: `astitva_stage`
+
+The application connects to only one database per process. It never copies or queries data across profiles.
 
 ## Finance collections (F006)
 
-`financeConnections` stores one Plaid Item per user and institution. It contains provider and institution identifiers, status, incremental transaction cursor, sync timestamps, excluded provider account IDs, and the Plaid access token encrypted with AES-256-GCM. Plaid credentials and the separate encryption key remain in server environment variables.
+`financeConnections` stores one Plaid Item per user, provider environment, and institution. It contains `providerEnvironment` (`sandbox` or `production`), provider and institution identifiers, status, incremental transaction cursor, sync timestamps, excluded provider account IDs, and the Plaid access token encrypted with AES-256-GCM. Plaid credentials and each profile's separate encryption key remain in server environment variables. The server rejects a connection whose stored provider environment does not match the running profile before attempting to decrypt its token.
 
 `financeAccounts` stores the normalized current view of each locally tracked account: owner and connection references, provider account ID, display name and mask, type, asset class, original currency, current/available balance, credit limit, and balance timestamp. Full account and routing numbers are never stored.
 

@@ -188,7 +188,19 @@ function VerificationResult({ token }) {
   );
 }
 
-function VerificationRequired({ user, onLogout }) {
+function EnvironmentBanner({ runtime }) {
+  if (!runtime) return null;
+  const isStage = runtime.environment === 'stage';
+  return (
+    <div className={`environment-banner ${isStage ? 'stage' : 'dev'}`} role="status">
+      {isStage
+        ? 'STAGE · PLAID PRODUCTION · REAL FINANCIAL DATA'
+        : 'DEV · PLAID SANDBOX · FAKE FINANCIAL DATA'}
+    </div>
+  );
+}
+
+function VerificationRequired({ user, onLogout, runtime }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -205,8 +217,9 @@ function VerificationRequired({ user, onLogout }) {
     }
   }
 
-  return (
-    <main className="verification-shell">
+  return (<>
+    <EnvironmentBanner runtime={runtime} />
+    <main className="verification-shell verification-with-banner">
       <section className="verification-card">
         <p className="eyebrow">Verification required</p>
         <h1>Check your email, {user.name}.</h1>
@@ -224,7 +237,7 @@ function VerificationRequired({ user, onLogout }) {
         {message && <p className="form-message" role="status">{message}</p>}
       </section>
     </main>
-  );
+  </>);
 }
 
 function ResetPassword({ token }) {
@@ -343,7 +356,7 @@ function PublicHome({ onAuthenticated }) {
   );
 }
 
-function Profile({ user, onLogout }) {
+function Profile({ user, onLogout, runtime }) {
   const pageFromHash = () => window.location.hash === '#diet' ? 'diet' : window.location.hash === '#finance' ? 'finance' : 'profile';
   const [page, setPage] = useState(pageFromHash);
   useEffect(() => {
@@ -353,6 +366,7 @@ function Profile({ user, onLogout }) {
   }, []);
   return (
     <main className="profile-shell">
+      <EnvironmentBanner runtime={runtime} />
       <aside className="profile-sidebar">
         <a className="brand light" href="#profile">Astitva<span>.</span></a>
         <nav aria-label="Profile navigation">
@@ -365,7 +379,7 @@ function Profile({ user, onLogout }) {
         <button className="button sidebar-logout" type="button" onClick={onLogout}>Log out</button>
       </aside>
 
-      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} /> : <section className="profile-content" id="profile">
+      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} runtime={runtime} /> : <section className="profile-content" id="profile">
         <header className="profile-header">
           <div><p className="eyebrow">Local profile</p><h1>Good to see you, {user.name}.</h1></div>
           <div className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</div>
@@ -398,12 +412,15 @@ function Profile({ user, onLogout }) {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [runtime, setRuntime] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiRequest('/api/auth/me')
-      .then((result) => setUser(result.user))
-      .catch(() => setUser(null))
+    Promise.allSettled([apiRequest('/api/health'), apiRequest('/api/auth/me')])
+      .then(([health, authentication]) => {
+        if (health.status === 'fulfilled') setRuntime(health.value);
+        setUser(authentication.status === 'fulfilled' ? authentication.value.user : null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -422,6 +439,6 @@ export default function App() {
 
   if (loading) return <div className="loading">Loading Astitva…</div>;
   if (!user) return <PublicHome onAuthenticated={setUser} />;
-  if (!user.emailVerified) return <VerificationRequired user={user} onLogout={logout} />;
-  return <Profile user={user} onLogout={logout} />;
+  if (!user.emailVerified) return <VerificationRequired user={user} onLogout={logout} runtime={runtime} />;
+  return <Profile user={user} onLogout={logout} runtime={runtime} />;
 }

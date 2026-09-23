@@ -14,13 +14,13 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review F006 Personal Finance with the local Express server and Plaid Sandbox.
+Review F007 environment labeling and Stage real-account confirmation with the local Express server.
 
 ## Run locally
 
-1. Start MongoDB, Mailpit, and the Express server first.
-2. From this folder, run `npm install` once.
-3. Run `npm run dev`.
+1. Start MongoDB and Mailpit.
+2. Install dependencies once in this folder and `server/`.
+3. From the repository root, run `./scripts/start-local.sh dev` or `./scripts/start-local.sh stage`.
 4. Open `http://localhost:3000`.
 
 Vite sends relative `/api` requests to the Express server at `http://127.0.0.1:3001` during local development.
@@ -28,3 +28,5 @@ Vite sends relative `/api` requests to the Express server at `http://127.0.0.1:3
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.
 
 F006 is ready for manual review: Finance is accessible from the verified profile and uses Plaid Link only for Sandbox account connection. Summary and account pages read synchronized local data. See `../docs/features/F006-personal-finance.md`.
+
+F007 is ready for manual review: authenticated pages show the active profile, and Stage confirms before opening Plaid Production Link. See `../docs/features/F007-local-stage-environment.md`.

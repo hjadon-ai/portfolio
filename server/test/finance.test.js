@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { assetClass, calculateSpending, calculateTotals, transactionDirection } = require('../src/services/finance/syncFinance');
+const { assetClass, assertConnectionEnvironment, calculateSpending, calculateTotals, transactionDirection } = require('../src/services/finance/syncFinance');
 const { encryptToken, decryptToken } = require('../src/services/finance/tokenEncryption');
 
 test('finance access tokens are encrypted and authenticated', () => {
@@ -56,4 +56,11 @@ test('monthly spending totals and sorts normalized categories', () => {
       { name: 'TRANSPORTATION', amount: 15 }
     ]
   });
+});
+
+test('a provider-environment mismatch is rejected before token handling', () => {
+  assert.throws(
+    () => assertConnectionEnvironment({ providerEnvironment: 'sandbox', encryptedAccessToken: 'not-readable' }, 'production'),
+    (error) => error.code === 'PROVIDER_ENVIRONMENT_MISMATCH'
+  );
 });

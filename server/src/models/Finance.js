@@ -6,6 +6,7 @@ const connection = { type: mongoose.Schema.Types.ObjectId, ref: 'FinanceConnecti
 const financeConnectionSchema = new mongoose.Schema({
   userId: owner,
   provider: { type: String, enum: ['plaid'], required: true },
+  providerEnvironment: { type: String, enum: ['sandbox', 'production'], required: true },
   providerItemId: { type: String, required: true },
   encryptedAccessToken: {
     iv: { type: String, required: true },
@@ -25,7 +26,10 @@ const financeConnectionSchema = new mongoose.Schema({
   lastSuccessfulSyncAt: { type: Date, default: null },
   lastSyncErrorCode: { type: String, default: null }
 }, { timestamps: true, collection: 'financeConnections' });
-financeConnectionSchema.index({ userId: 1, provider: 1, providerItemId: 1 }, { unique: true });
+financeConnectionSchema.index(
+  { userId: 1, provider: 1, providerEnvironment: 1, providerItemId: 1 },
+  { unique: true }
+);
 financeConnectionSchema.index({ userId: 1, status: 1 });
 
 const financeAccountSchema = new mongoose.Schema({

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Finance uses Plaid Sandbox credentials configured only on the server. Postman keeps the login session cookie automatically.",
+    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Finance uses the active Dev/Sandbox or Stage/Production credentials configured only on the server. Postman keeps the login session cookie automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -288,7 +288,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Paste a fresh short-lived public token from a Plaid Sandbox Link flow into plaidPublicToken. The web page normally performs this exchange automatically.",
+            "description": "Paste a fresh short-lived public token from a the active Plaid environment Link flow into plaidPublicToken. The web page normally performs this exchange automatically.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"provider\": \"plaid\",\n  \"exchangeToken\": \"{{plaidPublicToken}}\"\n}"

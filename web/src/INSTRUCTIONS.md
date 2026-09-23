@@ -1,3 +1,3 @@
 # React source
 
-This folder contains the local React interface. Keep API calls pointed at relative `/api` paths so Vite can proxy them to the Express server on port 3001.
+This folder contains the local React interface. Keep API calls pointed at relative `/api` paths so Vite can proxy them to the Express server on port 3001. Read safe runtime metadata from `/api/health`; never put Plaid credentials or environment switching in the browser.

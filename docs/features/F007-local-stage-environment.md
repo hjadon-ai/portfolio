@@ -1,7 +1,7 @@
 # F007: Local Stage environment
 
-- **Status:** Approved
-- **Branch:** Not created
+- **Status:** Review
+- **Branch:** `feature/F007-local-stage-environment`
 - **Pull request:** Not created
 
 ## Goal
@@ -217,18 +217,30 @@ Plaid's official API documentation lists only [Sandbox and Production hosts](htt
 
 ## Local verification
 
-Not implemented. After implementation is approved:
+Implemented locally on 2026-09-22. Automated and configuration checks completed:
+
+- Server tests pass: 10/10, including both valid profile mappings, crossed-profile rejection, local MongoDB enforcement, placeholder/key rejection, token encryption, and provider-environment mismatch rejection before token handling.
+- The React production build passes.
+- JSON parsing passes for the Finance OpenAPI document, Postman collection, and both Postman environments.
+- Dev starts through `./scripts/start-local.sh dev`, connects to `astitva`, and reports `dev` / `sandbox` through `/api/health`.
+- A second launch is refused while ports `3000` and `3001` are occupied.
+- Ctrl+C stops both Dev child processes and releases both ports.
+- Stage with placeholder credentials fails before the API listens, reports only the missing variable name, and cleans up the web child process.
+- Stage starts with configured Production/Trial credentials, connects to `astitva_stage`, and reports `stage` / `production` through `/api/health`.
+- A Plaid Production `link/token/create` configuration check succeeds without creating an Item or printing the short-lived token.
+- The ignored Dev and Stage files are owner-readable, use distinct finance encryption keys, and do not appear in Git status.
+- `git diff --check` passes, and tracked configuration examples contain placeholders rather than secrets.
+
+Manual review with the user's Plaid Production/Trial credentials remains:
 
 1. Start Dev and verify the banner, `astitva` database, Sandbox Link, and existing fake F006 values.
 2. Stop Dev, start Stage, and verify the Stage banner, separate signup/session, and empty `astitva_stage` Finance page.
-3. Try each invalid configuration pair and confirm startup fails before either application listens.
-4. Confirm `.env.dev` and `.env.stage` are ignored, their examples contain no secrets, and no process output reveals configured values.
-5. Connect one intentional real institution in Stage and confirm the connection records `providerEnvironment: production`.
-6. Compare the displayed accounts and values with the institution, allowing for Plaid update timing and institution-specific availability.
-7. Inspect `astitva` and `astitva_stage` separately and confirm no shared user, session, token, or Finance record.
-8. Stop Stage and restart Dev; confirm all original Sandbox data remains unchanged and no Stage data appears.
-9. Verify both Postman environments report the expected runtime and cannot use a session cookie from the other profile.
-10. Search tracked files and server/browser logs for the Production secret, encryption keys, public tokens, access tokens, and real account identifiers.
+3. Connect one intentional real institution in Stage and confirm the connection records `providerEnvironment: production`.
+4. Compare the displayed accounts and values with the institution, allowing for Plaid update timing and institution-specific availability.
+5. Inspect `astitva` and `astitva_stage` separately and confirm no shared user, session, token, or Finance record.
+6. Stop Stage and restart Dev; confirm all original Sandbox data remains unchanged and no Stage data appears.
+7. Verify both Postman environments report the expected runtime and cannot use a session cookie from the other profile.
+8. Search server/browser logs for the Production secret, encryption keys, public tokens, access tokens, and real account identifiers.
 
 Because a Trial plan may count every newly created Production Item against a fixed lifetime limit even after disconnection, use one deliberate real connection for acceptance testing rather than repeatedly creating Items.
 

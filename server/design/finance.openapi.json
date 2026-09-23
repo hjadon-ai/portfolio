@@ -2,188 +2,833 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Astitva Finance API",
-    "version": "0.6.0",
-    "description": "Local-first Finance APIs backed by Plaid Sandbox and localhost MongoDB."
+    "version": "0.7.0",
+    "description": "Local-first Finance APIs backed by Plaid Sandbox in Dev or Plaid Production in Stage, with isolated localhost MongoDB databases."
   },
-  "servers": [{ "url": "http://localhost:3001" }],
+  "servers": [
+    {
+      "url": "http://localhost:3001"
+    }
+  ],
   "paths": {
     "/api/finance/summary": {
       "get": {
-        "tags": ["Finance"],
-        "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Get the locally stored Finance summary",
-        "parameters": [{
-          "name": "month", "in": "query", "required": false,
-          "schema": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" }
-        }],
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+            }
+          }
+        ],
         "responses": {
-          "200": { "description": "Finance summary", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Summary" } } } },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "200": {
+            "description": "Finance summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         }
       }
     },
     "/api/finance/connections": {
       "get": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "List connected institutions and their locally tracked accounts",
         "responses": {
-          "200": { "description": "Connections", "content": { "application/json": { "schema": { "type": "object", "properties": { "connections": { "type": "array", "items": { "$ref": "#/components/schemas/Connection" } } } } } } },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "200": {
+            "description": "Connections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connections": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Connection"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         }
       },
       "post": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Exchange a temporary Plaid token and synchronize the new connection",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": {
-          "type": "object", "required": ["provider", "exchangeToken"], "additionalProperties": false,
-          "properties": { "provider": { "type": "string", "enum": ["plaid"] }, "exchangeToken": { "type": "string" } }
-        } } } },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "provider",
+                  "exchangeToken"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "plaid"
+                    ]
+                  },
+                  "exchangeToken": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "201": { "description": "Connection created and synchronized" },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "409": { "description": "Connection already linked", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-          "502": { "$ref": "#/components/responses/ProviderFailure" }
+          "201": {
+            "description": "Connection created and synchronized"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "Connection already linked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderFailure"
+          }
         }
       }
     },
     "/api/finance/connection-sessions": {
       "post": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
-        "summary": "Create a temporary Plaid Sandbox Link session",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": {
-          "type": "object", "required": ["provider"], "additionalProperties": false,
-          "properties": { "provider": { "type": "string", "enum": ["plaid"] } }
-        } } } },
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "summary": "Create a temporary Plaid Link session for the active profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "provider"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "plaid"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "201": { "description": "Temporary session", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConnectionSession" } } } },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "502": { "$ref": "#/components/responses/ProviderFailure" },
-          "503": { "description": "Plaid Sandbox is not configured", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "201": {
+            "description": "Temporary session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderFailure"
+          },
+          "503": {
+            "description": "Plaid is not configured for the active profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/api/finance/sync": {
       "post": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Synchronize all active Finance connections",
         "responses": {
-          "200": { "description": "Complete or partial synchronization result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SyncResult" } } } },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "409": { "description": "A sync is already running", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-          "502": { "$ref": "#/components/responses/ProviderFailure" }
+          "200": {
+            "description": "Complete or partial synchronization result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "A sync is already running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderFailure"
+          }
         }
       }
     },
     "/api/finance/accounts/{accountId}": {
-      "parameters": [{ "name": "accountId", "in": "path", "required": true, "schema": { "type": "string" } }],
+      "parameters": [
+        {
+          "name": "accountId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Get one local Finance account with recent activity and holdings",
         "responses": {
-          "200": { "description": "Account detail", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AccountDetail" } } } },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "200": {
+            "description": "Account detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
         }
       },
       "delete": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Stop tracking one account locally while retaining its institution connection",
         "responses": {
-          "204": { "description": "Local account data deleted and provider account excluded from later syncs" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "204": {
+            "description": "Local account data deleted and provider account excluded from later syncs"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
         }
       }
     },
     "/api/finance/connections/{connectionId}": {
-      "parameters": [{ "name": "connectionId", "in": "path", "required": true, "schema": { "type": "string" } }],
+      "parameters": [
+        {
+          "name": "connectionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "delete": {
-        "tags": ["Finance"], "security": [{ "sessionCookie": [] }],
+        "tags": [
+          "Finance"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
         "summary": "Revoke a Plaid Item and delete all local data for the institution",
         "responses": {
-          "204": { "description": "Institution disconnected and local data deleted" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" },
-          "502": { "$ref": "#/components/responses/ProviderFailure" }
+          "204": {
+            "description": "Institution disconnected and local data deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderFailure"
+          }
         }
       }
     }
   },
   "components": {
-    "securitySchemes": { "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "astitva_session" } },
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "astitva_dev_session",
+        "description": "Dev uses astitva_dev_session; Stage uses astitva_stage_session."
+      }
+    },
     "responses": {
-      "BadRequest": { "description": "Request validation failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-      "Unauthorized": { "description": "Authentication required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-      "Forbidden": { "description": "Email verification required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-      "NotFound": { "description": "Owned Finance resource not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-      "ProviderFailure": { "description": "Plaid Sandbox failed; no secrets are returned", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      "BadRequest": {
+        "description": "Request validation failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Email verification required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Owned Finance resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ProviderFailure": {
+        "description": "The active Plaid environment failed; no secrets are returned",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
     },
     "schemas": {
-      "Error": { "type": "object", "required": ["error"], "properties": { "error": { "type": "string" }, "code": { "type": "string" } } },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
       "ConnectionSession": {
-        "type": "object", "required": ["provider", "sessionToken", "expiresAt"],
-        "properties": { "provider": { "type": "string", "enum": ["plaid"] }, "sessionToken": { "type": "string", "description": "Short-lived Plaid Link token; never persist it in the browser." }, "expiresAt": { "type": "string", "format": "date-time" } }
+        "type": "object",
+        "required": [
+          "provider",
+          "sessionToken",
+          "expiresAt"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "plaid"
+            ]
+          },
+          "sessionToken": {
+            "type": "string",
+            "description": "Short-lived Plaid Link token; never persist it in the browser."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "Account": {
-        "type": "object", "required": ["id", "connectionId", "name", "type", "assetClass", "currency", "balanceAsOf"],
+        "type": "object",
+        "required": [
+          "id",
+          "connectionId",
+          "name",
+          "type",
+          "assetClass",
+          "currency",
+          "balanceAsOf"
+        ],
         "properties": {
-          "id": { "type": "string" }, "connectionId": { "type": "string" }, "name": { "type": "string" },
-          "officialName": { "type": "string", "nullable": true }, "mask": { "type": "string", "nullable": true },
-          "type": { "type": "string" }, "subtype": { "type": "string", "nullable": true },
-          "assetClass": { "type": "string", "enum": ["cash", "investment", "debt"] }, "currency": { "type": "string" },
-          "currentBalance": { "type": "number", "nullable": true }, "availableBalance": { "type": "number", "nullable": true },
-          "creditLimit": { "type": "number", "nullable": true }, "balanceAsOf": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "string"
+          },
+          "connectionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "officialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mask": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetClass": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "investment",
+              "debt"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentBalance": {
+            "type": "number",
+            "nullable": true
+          },
+          "availableBalance": {
+            "type": "number",
+            "nullable": true
+          },
+          "creditLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "balanceAsOf": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Connection": {
-        "type": "object", "required": ["id", "provider", "institutionName", "status", "accounts"],
+        "type": "object",
+        "required": [
+          "id",
+          "provider",
+          "providerEnvironment",
+          "institutionName",
+          "status",
+          "accounts"
+        ],
         "properties": {
-          "id": { "type": "string" }, "provider": { "type": "string" }, "institutionId": { "type": "string" },
-          "institutionName": { "type": "string" }, "status": { "type": "string" },
-          "lastSuccessfulSyncAt": { "type": "string", "format": "date-time", "nullable": true },
-          "lastSyncErrorCode": { "type": "string", "nullable": true }, "accounts": { "type": "array", "items": { "$ref": "#/components/schemas/Account" } }
+          "id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "institutionId": {
+            "type": "string"
+          },
+          "institutionName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastSuccessfulSyncAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSyncErrorCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            }
+          },
+          "providerEnvironment": {
+            "type": "string",
+            "enum": [
+              "sandbox",
+              "production"
+            ]
+          }
         }
       },
       "Transaction": {
-        "type": "object", "required": ["id", "accountId", "date", "name", "amount", "currency", "direction", "category", "pending"],
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "date",
+          "name",
+          "amount",
+          "currency",
+          "direction",
+          "category",
+          "pending"
+        ],
         "properties": {
-          "id": { "type": "string" }, "accountId": { "type": "string" }, "date": { "type": "string", "format": "date" },
-          "name": { "type": "string" }, "merchantName": { "type": "string", "nullable": true }, "amount": { "type": "number" },
-          "currency": { "type": "string" }, "direction": { "type": "string", "enum": ["expense", "income", "other"] },
-          "category": { "type": "string" }, "pending": { "type": "boolean" }
+          "id": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "name": {
+            "type": "string"
+          },
+          "merchantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "expense",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string"
+          },
+          "pending": {
+            "type": "boolean"
+          }
         }
       },
       "Summary": {
-        "type": "object", "required": ["currency", "totals", "connectionCount", "accountCount", "monthlySpending", "recentTransactions", "sync"],
+        "type": "object",
+        "required": [
+          "currency",
+          "totals",
+          "connectionCount",
+          "accountCount",
+          "monthlySpending",
+          "recentTransactions",
+          "sync"
+        ],
         "properties": {
-          "asOf": { "type": "string", "format": "date-time", "nullable": true }, "currency": { "type": "string", "enum": ["USD"] },
-          "totals": { "type": "object", "properties": { "netWorth": { "type": "number" }, "cash": { "type": "number" }, "investments": { "type": "number" }, "debt": { "type": "number" } } },
-          "connectionCount": { "type": "integer" }, "accountCount": { "type": "integer" }, "excludedCurrencyAccountCount": { "type": "integer" },
-          "monthlySpending": { "type": "object", "properties": { "month": { "type": "string" }, "total": { "type": "number" }, "categories": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "amount": { "type": "number" } } } } } },
-          "recentTransactions": { "type": "array", "items": { "$ref": "#/components/schemas/Transaction" } },
-          "sync": { "type": "object", "properties": { "status": { "type": "string", "enum": ["empty", "current", "stale"] }, "lastSuccessfulSyncAt": { "type": "string", "format": "date-time", "nullable": true } } }
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "totals": {
+            "type": "object",
+            "properties": {
+              "netWorth": {
+                "type": "number"
+              },
+              "cash": {
+                "type": "number"
+              },
+              "investments": {
+                "type": "number"
+              },
+              "debt": {
+                "type": "number"
+              }
+            }
+          },
+          "connectionCount": {
+            "type": "integer"
+          },
+          "accountCount": {
+            "type": "integer"
+          },
+          "excludedCurrencyAccountCount": {
+            "type": "integer"
+          },
+          "monthlySpending": {
+            "type": "object",
+            "properties": {
+              "month": {
+                "type": "string"
+              },
+              "total": {
+                "type": "number"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "recentTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "sync": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "empty",
+                  "current",
+                  "stale"
+                ]
+              },
+              "lastSuccessfulSyncAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
         }
       },
       "Holding": {
-        "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "tickerSymbol": { "type": "string", "nullable": true }, "quantity": { "type": "number" }, "price": { "type": "number", "nullable": true }, "marketValue": { "type": "number" }, "currency": { "type": "string" } }
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tickerSymbol": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "marketValue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
       },
       "AccountDetail": {
-        "type": "object", "properties": { "account": { "$ref": "#/components/schemas/Account" }, "recentTransactions": { "type": "array", "items": { "$ref": "#/components/schemas/Transaction" } }, "holdings": { "type": "array", "items": { "$ref": "#/components/schemas/Holding" } } }
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "recentTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "holdings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Holding"
+            }
+          }
+        }
       },
       "SyncResult": {
-        "type": "object", "properties": { "status": { "type": "string", "enum": ["complete", "partial"] }, "results": { "type": "array", "items": { "type": "object", "properties": { "connectionId": { "type": "string" }, "status": { "type": "string" }, "code": { "type": "string" } } } } }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "connectionId": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

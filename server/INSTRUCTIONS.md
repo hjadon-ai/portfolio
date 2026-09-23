@@ -7,7 +7,7 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 ## Instructions
 
 - Keep REST APIs, MongoDB connection code, and MongoDB models in this folder.
-- MongoDB runs on localhost using the `astitva` database.
+- MongoDB runs on localhost. Dev uses `astitva`; Stage uses `astitva_stage`.
 - Use Express.js, as approved.
 - Keep approved authentication APIs together; add later feature APIs and collections in small reviewed groups.
 - Keep the backend separate from the web application.
@@ -16,20 +16,22 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review F006 Personal Finance locally with Plaid Sandbox and localhost MongoDB.
+Review F007 local environment isolation with Dev/Sandbox and Stage/Production.
 
 ## Run locally
 
 1. Start MongoDB on `localhost:27017`.
 2. Start Mailpit with SMTP on `localhost:1025` and its inbox on `http://localhost:8025`.
 3. From this folder, run `npm install` once.
-4. Run `npm start`.
+4. From the repository root, run `./scripts/start-local.sh dev` or `./scripts/start-local.sh stage`.
 5. The API is available at `http://localhost:3001`.
 
-For Finance, copy `.env.example` to the ignored `.env` file. Add `PLAID_CLIENT_ID`, the Plaid Sandbox `PLAID_SECRET`, and a 32-byte `FINANCE_TOKEN_ENCRYPTION_KEY` before starting the server. The start command loads `.env` when it exists.
+Copy `.env.dev.example` or `.env.stage.example` to the corresponding ignored environment file. Add the matching Plaid secret and a different 32-byte `FINANCE_TOKEN_ENCRYPTION_KEY` to each profile. Startup rejects missing, placeholder, remote, or crossed-profile configuration.
 
-Import the collection and local environment from `design/` into Postman. Postman keeps the HTTP-only login session cookie. Copy tokens from Mailpit links into `verificationToken` or `resetToken` when testing those endpoints directly.
+Import the collection and matching Dev or Stage environment from `design/` into Postman. Postman keeps the profile-specific HTTP-only login session cookie. Copy tokens from Mailpit links into `verificationToken` or `resetToken` when testing those endpoints directly.
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../docs/features/F005-daily-diet-tracking.md` for manual checks.
 
 F006 is ready for manual review: Finance uses Plaid Sandbox for connect/sync and stores the normalized result in local MongoDB. See `../docs/features/F006-personal-finance.md`.
+
+F007 is ready for manual review: the two profiles have isolated configuration, databases, cookies, and finance-provider environments. See `../docs/features/F007-local-stage-environment.md`.
