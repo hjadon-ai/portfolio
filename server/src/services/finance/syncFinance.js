@@ -5,6 +5,7 @@ const {
   FinanceTransaction
 } = require('../../models/Finance');
 const { decryptToken } = require('./tokenEncryption');
+const { getRuntimeConfig } = require('../../config/runtime');
 
 const numberOrNull = (value) => typeof value === 'number' && Number.isFinite(value) ? value : null;
 const cents = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
@@ -76,7 +77,16 @@ async function removeConnectionData(connection) {
   await FinanceConnection.deleteOne({ _id: connection._id, userId: connection.userId });
 }
 
+function assertConnectionEnvironment(connection, activeEnvironment = getRuntimeConfig().plaidEnvironment) {
+  if (connection.providerEnvironment !== activeEnvironment) {
+    const error = new Error('The stored Finance connection belongs to a different provider environment.');
+    error.code = 'PROVIDER_ENVIRONMENT_MISMATCH';
+    throw error;
+  }
+}
+
 async function synchronizeConnection(connection, provider) {
+  assertConnectionEnvironment(connection);
   connection.lastSyncStartedAt = new Date();
   await connection.save();
 
@@ -191,6 +201,7 @@ async function synchronizeConnection(connection, provider) {
 
 module.exports = {
   assetClass,
+  assertConnectionEnvironment,
   calculateSpending,
   calculateTotals,
   removeAccountData,

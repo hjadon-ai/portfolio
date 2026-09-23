@@ -1,6 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const Session = require('../models/Session');
+const { getRuntimeConfig } = require('../config/runtime');
 const { Meal, Targets, fields } = require('../models/Diet');
 const router = express.Router();
 const object = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -49,7 +50,7 @@ function mealInput(body, partial = false) {
 }
 
 router.use(async (req, res, next) => {
-  const token = req.cookies.astitva_session;
+  const token = req.cookies[getRuntimeConfig().sessionCookieName];
   if (typeof token !== 'string') return res.status(401).json({ error: 'Authentication required.' });
   const session = await Session.findOne({ tokenHash: crypto.createHash('sha256').update(token).digest('hex'),
     expiresAt: { $gt: new Date() } }).populate('userId');

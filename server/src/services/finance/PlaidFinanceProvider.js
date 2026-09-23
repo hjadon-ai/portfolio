@@ -1,3 +1,5 @@
+const { getRuntimeConfig } = require('../../config/runtime');
+
 class FinanceProviderError extends Error {
   constructor(code, message = 'The finance provider could not complete this request.') {
     super(message);
@@ -8,7 +10,9 @@ class FinanceProviderError extends Error {
 
 class PlaidFinanceProvider {
   constructor() {
-    this.baseUrl = 'https://sandbox.plaid.com';
+    const runtime = getRuntimeConfig();
+    this.baseUrl = runtime.plaidBaseUrl;
+    this.environment = runtime.plaidEnvironment;
   }
 
   configured() {
@@ -17,7 +21,7 @@ class PlaidFinanceProvider {
 
   assertConfigured() {
     if (!this.configured()) {
-      throw new FinanceProviderError('PROVIDER_NOT_CONFIGURED', 'Plaid Sandbox is not configured on the local server.');
+      throw new FinanceProviderError('PROVIDER_NOT_CONFIGURED', `Plaid ${this.environment} is not configured on the local server.`);
     }
   }
 

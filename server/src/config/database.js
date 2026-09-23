@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-
-const mongoUrl = process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017/astitva';
+const { getRuntimeConfig } = require('./runtime');
 
 async function connectDatabase() {
-  await mongoose.connect(mongoUrl);
+  const config = getRuntimeConfig();
+  await mongoose.connect(config.mongoUrl);
   console.log(`MongoDB connected: ${mongoose.connection.name}`);
 }
 

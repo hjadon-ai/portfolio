@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, CheckCircle2, Database, FolderKanban, LogIn, Mail, UserPlus, UserRound } from 'lucide-react';
 import Diet from './Diet';
 import Finance from './Finance';
+import { AppShell, Badge, Button, EnvironmentBanner, FormField, LoadingState, PageHeader, StatCard, Surface } from './ui';
 
 const emptyForm = { name: '', email: '', password: '' };
 
@@ -81,17 +83,14 @@ function AuthPanel({ mode, onModeChange, onAuthenticated, onForgotPassword }) {
       <h2 id="auth-title">{isSignup ? 'Create your profile.' : 'Welcome back.'}</h2>
       <form onSubmit={submit}>
         {isSignup && (
-          <label>
-            Name
+          <FormField label="Name">
             <input name="name" value={form.name} onChange={updateField} required maxLength="80" />
-          </label>
+          </FormField>
         )}
-        <label>
-          Email
+        <FormField label="Email">
           <input name="email" type="email" value={form.email} onChange={updateField} required />
-        </label>
-        <label>
-          Password
+        </FormField>
+        <FormField label="Password">
           <input
             name="password"
             type="password"
@@ -100,15 +99,15 @@ function AuthPanel({ mode, onModeChange, onAuthenticated, onForgotPassword }) {
             required
             minLength="8"
           />
-        </label>
+        </FormField>
         {!isSignup && (
           <button className="text-action" type="button" onClick={onForgotPassword}>
             Forgot password?
           </button>
         )}
-        <button className="button primary" type="submit" disabled={busy}>
+        <Button variant="primary" icon={isSignup ? UserPlus : LogIn} type="submit" disabled={busy}>
           {busy ? 'Please wait…' : isSignup ? 'Create account' : 'Login'}
-        </button>
+        </Button>
       </form>
       {message && <p className="form-message" role="status">{message}</p>}
     </aside>
@@ -139,18 +138,17 @@ function ForgotPasswordPanel({ onBack }) {
 
   return (
     <aside className="auth-panel" aria-labelledby="forgot-password-title">
-      <button className="text-action back-action" type="button" onClick={onBack}>← Back to login</button>
+      <button className="text-action back-action" type="button" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" /> Back to login</button>
       <p className="eyebrow">Account recovery</p>
       <h2 id="forgot-password-title">Reset your password.</h2>
       <p className="panel-copy">Enter your verified email address. If it is eligible, Mailpit will receive a reset link.</p>
       <form onSubmit={submit}>
-        <label>
-          Email
+        <FormField label="Email">
           <input name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-        </label>
-        <button className="button primary" type="submit" disabled={busy}>
+        </FormField>
+        <Button variant="primary" icon={Mail} type="submit" disabled={busy}>
           {busy ? 'Sending…' : 'Send reset link'}
-        </button>
+        </Button>
       </form>
       {message && <p className="form-message" role="status">{message}</p>}
     </aside>
@@ -188,7 +186,7 @@ function VerificationResult({ token }) {
   );
 }
 
-function VerificationRequired({ user, onLogout }) {
+function VerificationRequired({ user, onLogout, runtime }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -205,8 +203,9 @@ function VerificationRequired({ user, onLogout }) {
     }
   }
 
-  return (
-    <main className="verification-shell">
+  return (<>
+    <EnvironmentBanner runtime={runtime} />
+    <main className="verification-shell verification-with-banner">
       <section className="verification-card">
         <p className="eyebrow">Verification required</p>
         <h1>Check your email, {user.name}.</h1>
@@ -216,15 +215,15 @@ function VerificationRequired({ user, onLogout }) {
           verification.
         </p>
         <div className="verification-actions">
-          <button className="button primary" type="button" onClick={resend} disabled={busy}>
+          <Button variant="primary" icon={Mail} type="button" onClick={resend} disabled={busy}>
             {busy ? 'Sending…' : 'Resend verification email'}
-          </button>
-          <button className="button quiet" type="button" onClick={onLogout}>Log out</button>
+          </Button>
+          <Button variant="quiet" type="button" onClick={onLogout}>Log out</Button>
         </div>
         {message && <p className="form-message" role="status">{message}</p>}
       </section>
     </main>
-  );
+  </>);
 }
 
 function ResetPassword({ token }) {
@@ -271,17 +270,15 @@ function ResetPassword({ token }) {
           </>
         ) : (
           <form className="reset-form" onSubmit={submit}>
-            <label>
-              New password
+            <FormField label="New password">
               <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength="8" required />
-            </label>
-            <label>
-              Confirm new password
+            </FormField>
+            <FormField label="Confirm new password">
               <input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength="8" required />
-            </label>
-            <button className="button primary" type="submit" disabled={busy || !token}>
+            </FormField>
+            <Button variant="primary" type="submit" disabled={busy || !token}>
               {busy ? 'Changing…' : 'Change password'}
-            </button>
+            </Button>
             {state.message && <p className="form-message" role="status">{state.message}</p>}
           </form>
         )}
@@ -300,7 +297,7 @@ function PublicHome({ onAuthenticated }) {
         <nav aria-label="Main navigation">
           <a href="#work">Work</a>
           <a href="#about">About</a>
-          <button className="button quiet" type="button" onClick={() => setMode('login')}>Login</button>
+          <Button variant="quiet" type="button" onClick={() => setMode('login')}>Login</Button>
         </nav>
       </header>
 
@@ -308,8 +305,8 @@ function PublicHome({ onAuthenticated }) {
         <section className="hero">
           <div>
             <p className="eyebrow">Portfolio & personal workspace</p>
-            <h1>Making room for <em>possibility.</em></h1>
-            <p className="lede">A local space for projects, ideas, and the work that shapes what comes next.</p>
+            <h1>Your private workspace, <em>organized around your life.</em></h1>
+            <p className="lede">Projects, health, finance, and notes in one local application that keeps you in control.</p>
           </div>
           {mode === 'forgot-password' ? (
             <ForgotPasswordPanel onBack={() => setMode('login')} />
@@ -343,7 +340,7 @@ function PublicHome({ onAuthenticated }) {
   );
 }
 
-function Profile({ user, onLogout }) {
+function Profile({ user, onLogout, runtime }) {
   const pageFromHash = () => window.location.hash === '#diet' ? 'diet' : window.location.hash === '#finance' ? 'finance' : 'profile';
   const [page, setPage] = useState(pageFromHash);
   useEffect(() => {
@@ -352,58 +349,51 @@ function Profile({ user, onLogout }) {
     return () => window.removeEventListener('hashchange', change);
   }, []);
   return (
-    <main className="profile-shell">
-      <aside className="profile-sidebar">
-        <a className="brand light" href="#profile">Astitva<span>.</span></a>
-        <nav aria-label="Profile navigation">
-          <a className={page === 'profile' ? 'active' : ''} href="#profile">Overview</a>
-          <a className={page === 'diet' ? 'active' : ''} href="#diet">Diet</a>
-          <a className={page === 'finance' ? 'active' : ''} href="#finance">Finance</a>
-          <a href="#projects">Projects</a>
-          <a href="#notes">Notes</a>
-        </nav>
-        <button className="button sidebar-logout" type="button" onClick={onLogout}>Log out</button>
-      </aside>
+    <AppShell page={page} user={user} runtime={runtime} onLogout={onLogout}>
+      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} runtime={runtime} /> : <section className="profile-content" id="profile">
+        <PageHeader
+          eyebrow="Workspace / Overview"
+          title={`Good to see you, ${user.name}.`}
+          description="A clear summary of your private local workspace."
+          actions={<div className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</div>}
+        />
 
-      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} /> : <section className="profile-content" id="profile">
-        <header className="profile-header">
-          <div><p className="eyebrow">Local profile</p><h1>Good to see you, {user.name}.</h1></div>
-          <div className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</div>
-        </header>
-
-        <section className="profile-card">
+        <Surface className="profile-card">
           <div>
             <p className="eyebrow">Your account</p>
             <h2>{user.name}</h2>
             <p>{user.email}</p>
           </div>
-          <span className="status"><i></i> Local session active</span>
-        </section>
+          <Badge tone="success"><CheckCircle2 size={15} aria-hidden="true" /> Local session active</Badge>
+        </Surface>
 
         <section className="profile-grid" id="projects">
-          <article><p className="eyebrow">Projects</p><strong>2</strong><span>Sample placeholders</span></article>
-          <article><p className="eyebrow">Profile</p><strong>25%</strong><span>Ready for your content</span></article>
-          <article><p className="eyebrow">Database</p><strong>Local</strong><span>MongoDB connection</span></article>
+          <StatCard label="Projects" value="2" helper="Sample placeholders" icon={FolderKanban} accent="blue" />
+          <StatCard label="Profile" value="25%" helper="Ready for your content" icon={UserRound} accent="pink" />
+          <StatCard label="Database" value="Local" helper="MongoDB connection" icon={Database} accent="purple" />
         </section>
 
-        <section className="workspace-card" id="notes">
+        <Surface className="workspace-card" id="notes">
           <p className="eyebrow">Workspace</p>
           <h2>Your private area starts here.</h2>
           <p>This is a sample layout. We can decide what real profile content belongs here next.</p>
-        </section>
+        </Surface>
       </section>}
-    </main>
+    </AppShell>
   );
 }
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [runtime, setRuntime] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiRequest('/api/auth/me')
-      .then((result) => setUser(result.user))
-      .catch(() => setUser(null))
+    Promise.allSettled([apiRequest('/api/health'), apiRequest('/api/auth/me')])
+      .then(([health, authentication]) => {
+        if (health.status === 'fulfilled') setRuntime(health.value);
+        setUser(authentication.status === 'fulfilled' ? authentication.value.user : null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -420,8 +410,8 @@ export default function App() {
     return <ResetPassword token={location.searchParams.get('token')} />;
   }
 
-  if (loading) return <div className="loading">Loading Astitva…</div>;
+  if (loading) return <div className="loading"><LoadingState>Loading Astitva…</LoadingState></div>;
   if (!user) return <PublicHome onAuthenticated={setUser} />;
-  if (!user.emailVerified) return <VerificationRequired user={user} onLogout={logout} />;
-  return <Profile user={user} onLogout={logout} />;
+  if (!user.emailVerified) return <VerificationRequired user={user} onLogout={logout} runtime={runtime} />;
+  return <Profile user={user} onLogout={logout} runtime={runtime} />;
 }

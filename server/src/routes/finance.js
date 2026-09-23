@@ -10,6 +10,7 @@ const {
 const { financeProvider } = require('../services/finance');
 const { FinanceProviderError } = require('../services/finance/PlaidFinanceProvider');
 const { encryptToken, decryptToken } = require('../services/finance/tokenEncryption');
+const { getRuntimeConfig } = require('../config/runtime');
 const {
   calculateSpending,
   calculateTotals,
@@ -29,7 +30,7 @@ function providerResponse(response, error) {
     return response.status(503).json({ error: error.message, code: error.code });
   }
   return response.status(502).json({
-    error: 'Plaid Sandbox could not complete the request.',
+    error: `Plaid ${getRuntimeConfig().plaidEnvironment} could not complete the request.`,
     code: error instanceof FinanceProviderError ? error.code : 'PROVIDER_ERROR'
   });
 }
@@ -70,7 +71,7 @@ function publicTransaction(transaction) {
 }
 
 router.use(async (request, response, next) => {
-  const token = request.cookies.astitva_session;
+  const token = request.cookies[getRuntimeConfig().sessionCookieName];
   if (typeof token !== 'string') return response.status(401).json({ error: 'Authentication required.' });
   const session = await Session.findOne({
     tokenHash: crypto.createHash('sha256').update(token).digest('hex'),
@@ -138,6 +139,7 @@ router.get('/connections', async (request, response) => {
   return response.json({ connections: connections.map((connection) => ({
     id: String(connection._id),
     provider: connection.provider,
+    providerEnvironment: connection.providerEnvironment,
     institutionId: connection.institutionId,
     institutionName: connection.institutionName,
     status: connection.status,
@@ -167,6 +169,7 @@ router.post('/connections', async (request, response) => {
     return response.status(400).json({ error: 'Provider and exchange token are required.' });
   }
   const provider = financeProvider('plaid');
+  const providerEnvironment = getRuntimeConfig().plaidEnvironment;
   let completed;
   let connection;
   try {
@@ -174,6 +177,7 @@ router.post('/connections', async (request, response) => {
     const duplicate = await FinanceConnection.exists({
       userId: request.financeUserId,
       provider: 'plaid',
+      providerEnvironment,
       providerItemId: completed.providerItemId
     });
     if (duplicate) {
@@ -183,6 +187,7 @@ router.post('/connections', async (request, response) => {
     connection = await FinanceConnection.create({
       userId: request.financeUserId,
       provider: 'plaid',
+      providerEnvironment,
       providerItemId: completed.providerItemId,
       encryptedAccessToken: encryptToken(completed.accessToken),
       institutionId: completed.institutionId,
@@ -192,6 +197,7 @@ router.post('/connections', async (request, response) => {
     return response.status(201).json({ connection: {
       id: String(connection._id),
       provider: connection.provider,
+      providerEnvironment: connection.providerEnvironment,
       institutionId: connection.institutionId,
       institutionName: connection.institutionName,
       status: connection.status,
@@ -281,6 +287,12 @@ router.delete('/connections/:connectionId', async (request, response) => {
   if (!objectId(request.params.connectionId)) return response.status(404).json({ error: 'Finance connection not found.' });
   const connection = await FinanceConnection.findOne({ _id: request.params.connectionId, userId: request.financeUserId });
   if (!connection) return response.status(404).json({ error: 'Finance connection not found.' });
+  if (connection.providerEnvironment !== getRuntimeConfig().plaidEnvironment) {
+    return response.status(409).json({
+      error: 'This Finance connection belongs to a different provider environment.',
+      code: 'PROVIDER_ENVIRONMENT_MISMATCH'
+    });
+  }
   try {
     await financeProvider(connection.provider).disconnect(decryptToken(connection.encryptedAccessToken));
   } catch (error) {

@@ -28,11 +28,11 @@ Working process:
 Current status:
 - The React web application runs locally on port 3000.
 - The Express server runs locally on port 3001.
-- MongoDB runs locally and uses the `astitva` database.
+- MongoDB runs locally. Dev uses `astitva`; Stage uses the isolated `astitva_stage` database.
 - Health, signup, email verification, password reset, login, current-user, and logout APIs are implemented and documented for Postman.
 - Signup, email verification, password reset, login, profile-session restoration, and logout are connected to the local authentication APIs.
 - The authenticated Overview tab currently contains sample layout content.
-- Daily diet tracking and the Plaid Sandbox-backed Finance section are available from the verified profile.
+- Daily diet tracking and Finance are available from the verified profile. Dev uses Plaid Sandbox; Stage uses Plaid Production for real accounts.
 - Finance reads synchronized data from local MongoDB; Plaid credentials and encrypted access tokens remain on the server.
 
 Feature tracking:
@@ -63,4 +63,22 @@ ChatGPT brainstorming project:
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `docs/features/F005-daily-diet-tracking.md` for manual checks.
 
-F006 is ready for manual review on `feature/F006-personal-finance`. Configure the server from `server/.env.example`, then use Plaid Sandbox from the Finance page. See `docs/features/F006-personal-finance.md` for manual checks.
+## Local environments
+
+Install dependencies once in `server/` and `web/`, then start MongoDB and Mailpit. Configure one or both ignored profile files from their tracked examples:
+
+- `server/.env.dev.example` → `server/.env.dev` for Plaid Sandbox and `astitva`
+- `server/.env.stage.example` → `server/.env.stage` for Plaid Production/Trial and `astitva_stage`
+
+Use independent 32-byte finance encryption keys. Then run one profile from the repository root:
+
+```sh
+./scripts/start-local.sh dev
+./scripts/start-local.sh stage
+```
+
+Only one profile runs at a time on ports `3000` and `3001`. Stage remains local; browser Plaid Link and server requests to Plaid are its only external communication. Import the matching Dev or Stage Postman environment from `server/design/`.
+
+F006 is ready for manual review. F007 adds the isolated local Stage profile and environment banner. See their feature documents in `docs/features/` for manual checks.
+
+F011 is ready for manual review on `feature/F011-application-visual-system`. It adds the shared light visual system, responsive application shell, Lucide icons, reusable presentation components, and consistent styling without changing API behavior.

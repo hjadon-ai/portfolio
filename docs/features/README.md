@@ -16,10 +16,11 @@ This file is the current list of Astitva features.
 | F004 | Forgot password | Review | `feature/F004-forgot-password` | Not created |
 | F005 | Daily diet tracking | Review | `feature/F005-daily-diet-tracking` | Not created |
 | F006 | Personal finance | Review | `feature/F006-personal-finance` | Not created |
-| F007 | Local Stage environment | Approved | Not created | Not created |
+| F007 | Local Stage environment | Review | `feature/F007-local-stage-environment` | Not created |
 | F008 | Diet targets and Meal Library | Approved | Not created | Not created |
 | F009 | [Daily Priorities](F009-daily-priorities.md) | Approved | Not created | Not created |
 | F010 | [Quick Notes](F010-quick-notes.md) | Approved | Not created | Not created |
+| F011 | [Application visual system](F011-application-visual-system.md) | Review | `feature/F011-application-visual-system` | Not created |
 
 ## Rules
 

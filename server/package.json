@@ -5,7 +5,9 @@
   "description": "Local Express backend for the Astitva portfolio",
   "main": "src/server.js",
   "scripts": {
-    "start": "node --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file=.env.dev src/server.js",
+    "start:dev": "node --env-file=.env.dev src/server.js",
+    "start:stage": "node --env-file=.env.stage src/server.js",
     "test": "node --test"
   },
   "dependencies": {

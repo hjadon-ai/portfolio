@@ -2,8 +2,8 @@ openapi: 3.0.3
 
 info:
   title: Astitva API
-  version: 0.6.0
-  description: Local REST API for the Astitva portfolio.
+  version: 0.7.0
+  description: Local REST API for the Astitva Dev or Stage profile.
 
 servers:
   - url: http://localhost:3001
@@ -243,7 +243,8 @@ components:
     sessionCookie:
       type: apiKey
       in: cookie
-      name: astitva_session
+      name: astitva_dev_session
+      description: Dev uses astitva_dev_session; Stage uses astitva_stage_session.
 
   responses:
     BadRequest:
@@ -262,7 +263,7 @@ components:
   schemas:
     HealthResponse:
       type: object
-      required: [status, message]
+      required: [status, message, environment, financeProvider]
       properties:
         status:
           type: string
@@ -270,6 +271,21 @@ components:
         message:
           type: string
           example: Astitva server is running
+        environment:
+          type: string
+          enum: [dev, stage]
+        financeProvider:
+          type: object
+          required: [name, environment, configured]
+          properties:
+            name:
+              type: string
+              enum: [plaid]
+            environment:
+              type: string
+              enum: [sandbox, production]
+            configured:
+              type: boolean
 
     SignupRequest:
       type: object

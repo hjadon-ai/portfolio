@@ -6,9 +6,10 @@ const Session = require('../models/Session');
 const EmailVerificationToken = require('../models/EmailVerificationToken');
 const PasswordResetToken = require('../models/PasswordResetToken');
 const { sendPasswordResetEmail, sendVerificationEmail } = require('../services/email');
+const { getRuntimeConfig } = require('../config/runtime');
 
 const router = express.Router();
-const cookieName = 'astitva_session';
+const cookieName = () => getRuntimeConfig().sessionCookieName;
 const sessionDuration = 24 * 60 * 60 * 1000;
 const verificationDuration = 60 * 60 * 1000;
 const passwordResetDuration = 60 * 60 * 1000;
@@ -77,7 +78,7 @@ async function createPasswordResetToken(user) {
 }
 
 async function authenticatedUser(request, response) {
-  const token = request.cookies[cookieName];
+  const token = request.cookies[cookieName()];
   if (!token) return null;
 
   const session = await Session.findOne({
@@ -98,7 +99,7 @@ function hashToken(token) {
 }
 
 function clearSessionCookie(response) {
-  response.clearCookie(cookieName, { httpOnly: true, sameSite: 'lax' });
+  response.clearCookie(cookieName(), { httpOnly: true, sameSite: 'lax' });
 }
 
 router.post('/signup', async (request, response) => {
@@ -156,7 +157,7 @@ router.post('/login', async (request, response) => {
     expiresAt: new Date(Date.now() + sessionDuration)
   });
 
-  response.cookie(cookieName, token, {
+  response.cookie(cookieName(), token, {
     httpOnly: true,
     sameSite: 'lax',
     maxAge: sessionDuration
@@ -295,7 +296,7 @@ router.post('/reset-password', async (request, response) => {
 });
 
 router.post('/logout', async (request, response) => {
-  const token = request.cookies[cookieName];
+  const token = request.cookies[cookieName()];
   if (token) {
     await Session.deleteOne({ tokenHash: hashToken(token) });
   }
