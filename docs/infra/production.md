@@ -69,6 +69,33 @@ Deploy the live channel only after explicit approval:
 firebase deploy --only hosting
 ```
 
+## 6. Configure manual GitHub Actions deployments
+
+The repository contains two manually triggered production workflows:
+
+- `.github/workflows/deploy-server-render.yml` tests the Express server and asks Render to deploy the selected `main` commit.
+- `.github/workflows/deploy-web-firebase.yml` builds the React application with the Production API origin and deploys `web/dist` to Firebase Hosting's live channel.
+
+In GitHub, open **Settings → Secrets and variables → Actions** and configure:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| Repository or `production` environment variable | `FIREBASE_PROJECT_ID` | Firebase project ID, without `.web.app` |
+| Repository or `production` environment variable | `VITE_API_BASE_URL` | Exact HTTPS Render service origin |
+| Repository or `production` environment secret | `FIREBASE_SERVICE_ACCOUNT` | Complete Firebase deployment service-account JSON |
+| Repository or `production` environment secret | `RENDER_DEPLOY_HOOK_URL` | Render service deploy hook URL from **Settings → Deploy Hook** |
+
+The deploy hook is a credential. Never put it in `render.yaml`, a workflow file, logs, or source control. Keep Render automatic deploys disabled because the workflow triggers a specific commit explicitly.
+
+Run a deployment from **GitHub → Actions** while viewing the `main` branch:
+
+1. Run **Deploy server to Render** and confirm the resulting deploy becomes healthy in Render.
+2. Confirm `GET /api/health` succeeds at the Render URL.
+3. Run **Deploy web to Firebase Hosting** so the bundle receives that Render origin.
+4. Complete the smoke test below.
+
+Both workflows use the GitHub `production` environment. Add required reviewers to that environment if deployment approval should be enforced in GitHub. A successful Render workflow response means the deploy was accepted or queued; confirm completion and health in the Render dashboard.
+
 ## Smoke test
 
 1. `GET /api/health` returns Production and cloud metadata.
