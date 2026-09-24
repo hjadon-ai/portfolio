@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: Astitva API
-  version: 0.7.0
+  version: 0.9.0
   description: Local REST API for the Astitva Dev or Stage profile.
 
 servers:
@@ -13,8 +13,15 @@ tags:
   - name: System
   - name: Authentication
   - name: Finance
+  - name: Daily Priorities
 
 paths:
+  /api/priorities/days/{date}:
+    $ref: './priorities.openapi.json#/paths/~1api~1priorities~1days~1{date}'
+  /api/priorities/days/{date}/priorities:
+    $ref: './priorities.openapi.json#/paths/~1api~1priorities~1days~1{date}~1priorities'
+  /api/priorities/days/{date}/priorities/{priorityId}:
+    $ref: './priorities.openapi.json#/paths/~1api~1priorities~1days~1{date}~1priorities~1{priorityId}'
   /api/finance/summary:
     $ref: './finance.openapi.json#/paths/~1api~1finance~1summary'
   /api/finance/connections:

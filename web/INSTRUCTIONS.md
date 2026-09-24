@@ -14,7 +14,7 @@ This folder will contain the single-page frontend for the Astitva portfolio.
 
 ## Current step
 
-Review F011 visual consistency and responsive behavior across public, authentication, Overview, Diet, and Finance screens.
+Review F009 Daily Priorities in the authenticated application shell.
 
 ## Run locally
 
@@ -32,3 +32,5 @@ F006 is ready for manual review: Finance is accessible from the verified profile
 F007 is ready for manual review: authenticated pages show the active profile, and Stage confirms before opening Plaid Production Link. See `../docs/features/F007-local-stage-environment.md`.
 
 F011 is ready for manual review: the React application uses semantic visual tokens, the shared presentation components under `src/ui/`, Lucide icons, and a responsive application shell. Existing feature behavior and API contracts remain unchanged. See `../docs/features/F011-application-visual-system.md`.
+
+F009 is ready for manual review: the sidebar opens a per-day list with up to three priorities, progress, inline add/edit/delete, completion controls, and past-date navigation. See `../docs/features/F009-daily-priorities.md`.

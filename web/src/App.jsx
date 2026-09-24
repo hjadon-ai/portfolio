@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Database, FolderKanban, LogIn, Mail, UserPlus, UserRound } from 'lucide-react';
 import Diet from './Diet';
+import Priorities from './Priorities';
 import Finance from './Finance';
 import { AppShell, Badge, Button, EnvironmentBanner, FormField, LoadingState, PageHeader, StatCard, Surface } from './ui';
 
@@ -18,7 +19,11 @@ async function apiRequest(path, options = {}) {
 
   if (response.status === 204) return null;
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || 'Something went wrong.');
+  if (!response.ok) {
+    const error = new Error(body.error || 'Something went wrong.');
+    error.status = response.status;
+    throw error;
+  }
   return body;
 }
 
@@ -341,7 +346,7 @@ function PublicHome({ onAuthenticated }) {
 }
 
 function Profile({ user, onLogout, runtime }) {
-  const pageFromHash = () => window.location.hash === '#diet' ? 'diet' : window.location.hash === '#finance' ? 'finance' : 'profile';
+  const pageFromHash = () => window.location.hash === '#priorities' ? 'priorities' : window.location.hash === '#diet' ? 'diet' : window.location.hash === '#finance' ? 'finance' : 'profile';
   const [page, setPage] = useState(pageFromHash);
   useEffect(() => {
     const change = () => setPage(pageFromHash());
@@ -350,7 +355,7 @@ function Profile({ user, onLogout, runtime }) {
   }, []);
   return (
     <AppShell page={page} user={user} runtime={runtime} onLogout={onLogout}>
-      {page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} runtime={runtime} /> : <section className="profile-content" id="profile">
+      {page === 'priorities' ? <Priorities apiRequest={apiRequest} /> : page === 'diet' ? <Diet apiRequest={apiRequest} /> : page === 'finance' ? <Finance apiRequest={apiRequest} runtime={runtime} /> : <section className="profile-content" id="profile">
         <PageHeader
           eyebrow="Workspace / Overview"
           title={`Good to see you, ${user.name}.`}

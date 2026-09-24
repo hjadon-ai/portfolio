@@ -82,3 +82,9 @@ Only one profile runs at a time on ports `3000` and `3001`. Stage remains local;
 F006 is ready for manual review. F007 adds the isolated local Stage profile and environment banner. See their feature documents in `docs/features/` for manual checks.
 
 F011 is ready for manual review on `feature/F011-application-visual-system`. It adds the shared light visual system, responsive application shell, Lucide icons, reusable presentation components, and consistent styling without changing API behavior.
+
+F009 Daily Priorities is ready for manual review on `feature/F009-daily-priorities`.
+The private page supports up to three priorities per day, completion progress,
+past-date navigation, inline editing and deletion, and local MongoDB persistence.
+The automated MongoDB ownership and concurrency suite and the web build pass. See
+`docs/features/F009-daily-priorities.md` for the manual browser checklist.

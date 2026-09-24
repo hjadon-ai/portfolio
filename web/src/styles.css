@@ -303,3 +303,18 @@ input:focus, select:focus, textarea:focus { border-color: var(--color-primary); 
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* F009: bounded daily priorities, using the shared visual tokens. */
+.priorities-panel { padding: 24px; }
+.priority-list { margin: 20px 0; padding: 0; list-style: none; }
+.priority-row { padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+.priority-row-main { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.priority-check { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.priority-check span { overflow-wrap: anywhere; }
+.priority-check input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--color-primary); }
+.priority-editor, .priority-confirm { margin-top: 20px; }
+.priority-editor { display: grid; gap: 16px; max-width: 560px; }
+@media (max-width: 640px) {
+  .priorities-panel { padding: 16px; }
+  .priority-row-main { align-items: flex-start; flex-direction: column; }
+}

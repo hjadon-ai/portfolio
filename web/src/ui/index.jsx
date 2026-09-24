@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
-import { Home, LogOut, Menu, Utensils, WalletCards, X } from 'lucide-react';
+import { ListChecks, Home, LogOut, Menu, Utensils, WalletCards, X } from 'lucide-react';
 
 const classes = (...values) => values.filter(Boolean).join(' ');
 
@@ -152,6 +152,7 @@ export function EnvironmentBanner({ runtime }) {
 
 const navigation = [
   { id: 'profile', label: 'Overview', icon: Home },
+  { id: 'priorities', label: 'Daily Priorities', icon: ListChecks },
   { id: 'diet', label: 'Diet', icon: Utensils },
   { id: 'finance', label: 'Finance', icon: WalletCards }
 ];

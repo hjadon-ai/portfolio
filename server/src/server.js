@@ -5,6 +5,7 @@ const { connectDatabase } = require('./config/database');
 const { getRuntimeConfig } = require('./config/runtime');
 const { FinanceConnection } = require('./models/Finance');
 const authRoutes = require('./routes/auth');
+const DailyPriorityDay = require('./models/DailyPriorityDay');
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
@@ -14,8 +15,10 @@ app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true
 }));
-app.use(express.json());
 app.use(cookieParser());
+// Priorities parses JSON after its session gate and handles malformed bodies locally.
+app.use('/api/priorities', require('./routes/priorities'));
+app.use(express.json());
 
 app.get('/api/health', (request, response) => {
   response.status(200).json({
@@ -41,6 +44,7 @@ app.use((error, request, response, next) => {
 
 async function startServer() {
   await connectDatabase();
+  await DailyPriorityDay.createIndexes();
   await FinanceConnection.updateMany(
     { providerEnvironment: { $exists: false } },
     { $set: { providerEnvironment: runtime.plaidEnvironment } }
