@@ -16,7 +16,7 @@ This folder will contain the Node.js backend for the Astitva portfolio.
 
 ## Current step
 
-Review F007 local environment isolation with Dev/Sandbox and Stage/Production.
+Review F009 Daily Priorities with the private per-day REST API and local MongoDB persistence.
 
 ## Run locally
 
@@ -35,3 +35,5 @@ F005 is ready for manual review: Diet is accessible from the verified profile, w
 F006 is ready for manual review: Finance uses Plaid Sandbox for connect/sync and stores the normalized result in local MongoDB. See `../docs/features/F006-personal-finance.md`.
 
 F007 is ready for manual review: the two profiles have isolated configuration, databases, cookies, and finance-provider environments. See `../docs/features/F007-local-stage-environment.md`.
+
+F009 is ready for manual review: verified users can manage up to three private priorities for today or a past date. See `../docs/features/F009-daily-priorities.md`.

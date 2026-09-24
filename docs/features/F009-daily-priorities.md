@@ -1,7 +1,7 @@
 # F009: Daily Priorities
 
-- **Status:** Approved
-- **Branch:** Not created
+- **Status:** Review
+- **Branch:** `feature/F009-daily-priorities`
 - **Pull request:** Not created
 
 The project owner approved the documented behavior, wireframe, API, storage, architecture decisions, and acceptance criteria for future implementation.
@@ -199,9 +199,59 @@ This keeps the invariant across Express processes without multi-document transac
 - All actions are keyboard accessible with meaningful labels, visible focus, sensible focus restoration, and announced status/errors.
 - After approval and implementation, OpenAPI, Postman, and collection design documentation match the reviewed contract and include the important errors. Everything runs locally.
 
-### Local verification
+### Implementation and local verification
 
-Documentation only; no application code or API artifacts changed and no implementation tests run. Future verification should exercise the acceptance criteria with two verified accounts and an unverified account, concurrent HTTP requests, browser timezone/date-boundary cases, keyboard navigation, and simulated network failures; then run the appropriate server tests and web build and review the documented Postman requests locally.
+Implemented on `feature/F009-daily-priorities` in the isolated Git worktree
+`/private/tmp/astitva-implement-approved-F009`, based on committed F011 (`43c799a`).
+The original checkout and its uncommitted feature-document organization remain
+untouched. F008 is committed and pushed separately; this worktree's unchanged F008
+records describe its older committed baseline. No F009 commits, pushes, or pull
+requests were created.
+
+F009 adds the private Daily Priorities panel, browser-local date navigation,
+inline add/edit/delete, completion and actual-count progress, draft preservation,
+explicit refresh after uncertain writes, and stale-load protection. REST routes
+validate session/verification, timezone/calendar date, strict bodies, and owner
+filters. `dailyPriorityDays` uses the approved unique index, atomic capacity push,
+positional field updates, and retained empty days. OpenAPI, Postman, both local
+request environments, and collection documentation cover the feature. Runtime
+cookies follow the existing F007 convention (`astitva_dev_session` or
+`astitva_stage_session`) rather than introducing a new authentication behavior.
+
+Validation on September 23, 2026:
+
+- Passed: `npm test` in `server/`: 16 tests passed and the explicitly opt-in F009
+  MongoDB integration test was skipped as designed.
+- Passed: `ASTITVA_TEST_PRIORITIES=1 npm test`: all 17 tests passed. The integration
+  suite covered missing, expired, and unverified sessions; another owner's item ID;
+  missing days; strict validation; persistence; concurrent first adds; full-day
+  races; independent field updates; deletion and reopening; retained empty days;
+  and no carryover. Generated fixtures were removed after the run.
+- Passed: `npm run build` in `web/`; Node syntax checks; JSON artifact parsing;
+  local OpenAPI reference checks; and `git diff --check`.
+- Passed: the isolated Dev worktree connected to local MongoDB and served the web
+  app and API on ports 3000 and 3001. The page, Vite health proxy, unauthenticated
+  `401`, local login, and authenticated empty-day response were verified over HTTP.
+- Not run: interactive browser checks for responsive layout, keyboard focus, and
+  simulated network states because no controllable browser is available in this
+  tool session. These remain in the owner's manual review below.
+
+### Remaining validation and manual review checklist
+
+1. Open `http://localhost:3000`, log in with a verified account, open **Daily Priorities**, add three items,
+   complete/reopen and rename one, then delete one and add a replacement. Reload
+   and confirm insertion order, exact progress, and saved data.
+2. Test empty/past days, future-date rejection, browser-local today near midnight,
+   and daylight-saving calendar navigation. No unfinished item should carry over.
+3. Use keyboard Tab/Enter/Space through add/edit/delete confirmation and Cancel;
+   check focus restoration, announced status/errors, and narrow-screen layout.
+4. Simulate slow date loads, failed loads, failed saves, lost mutation responses,
+   successful writes followed by failed refreshes, and a competing fourth add.
+   Confirm no stale rows, duplicate automatic adds, lost draft, or false save error.
+5. Import the matching Postman environment and exercise the Daily Priorities
+   folder with verified, unverified, and second-owner sessions.
+6. Revalidate integration when combining with F008 in the owner's Git workflow;
+   shared API helper, navigation, styles and API index changes may require review.
 
 ## Open questions
 

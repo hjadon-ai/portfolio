@@ -74,3 +74,26 @@ Stores single-use password-reset tokens. Only the SHA-256 hash is stored. Expire
 | `expiresAt` | Date | One-hour expiration and TTL field |
 | `createdAt` | Date | Creation time |
 | `updatedAt` | Date | Last update time |
+
+## `dailyPriorityDays` (F009)
+
+One private calendar day per user, with up to three priorities in insertion order.
+`userId` is a required immutable User ObjectId derived exclusively from the session;
+`date` is a required immutable real `YYYY-MM-DD` calendar date. `priorities` defaults
+to an empty array and contains at most three embedded items, each with a generated
+ObjectId `_id`, a required trimmed single-line `title` (1–120 JavaScript string
+units), and a required boolean `completed` (default false). Day `createdAt` and
+`updatedAt` are server-managed BSON Dates. Progress is calculated, never stored.
+
+The unique `{ userId: 1, date: 1 }` index is created before the server accepts
+requests; retain the default `_id` index. Empty days remain after deletion. GET
+never initializes a day. POST first performs an owner/date-only `$setOnInsert`
+upsert (duplicate-key races reuse that same day), then a non-upsert atomic `$push`
+filtered by `'priorities.2': { $exists: false }`. A missed capacity predicate is
+409. PATCH uses positional `$set` of supplied fields only; DELETE uses `$pull`.
+Every filter includes owner/date and item mutations also match item ID. No stale
+array replacements, process locks, replica sets, or transactions are required.
+
+The browser-declared `X-Time-Zone` IANA zone determines today's server-side upper
+bound; it is a calendar preference, never authorization. Dates remain verbatim
+strings across timezone changes. No automatic carryover or day deletion exists.
