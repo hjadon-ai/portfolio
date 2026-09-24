@@ -168,6 +168,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--color-primary); 
 .environment-banner { grid-column: 1 / -1; min-height: 34px; display: grid; place-items: center; padding: 7px 18px; color: #fff; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-align: center; }
 .environment-banner.dev { background: #1d4ed8; }
 .environment-banner.stage { background: #b91c1c; }
+.environment-banner.production { background: #6d28d9; }
 .app-sidebar { position: sticky; top: 0; height: calc(100vh - 34px); display: flex; flex-direction: column; padding: 28px 20px 22px; border-right: 1px solid var(--color-border); background: var(--color-surface); }
 .app-sidebar .brand { padding: 0 10px; }
 .sidebar-heading { margin: 52px 10px 9px; color: #94a3b8; font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }

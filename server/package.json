@@ -4,10 +4,14 @@
   "private": true,
   "description": "Local Express backend for the Astitva portfolio",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=22.20.0 <25"
+  },
   "scripts": {
     "start": "node --env-file=.env.dev src/server.js",
     "start:dev": "node --env-file=.env.dev src/server.js",
     "start:stage": "node --env-file=.env.stage src/server.js",
+    "start:production": "node src/server.js",
     "test": "node --test"
   },
   "dependencies": {

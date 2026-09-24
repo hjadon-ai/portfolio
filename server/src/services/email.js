@@ -1,26 +1,34 @@
 const nodemailer = require('nodemailer');
+const { getRuntimeConfig } = require('../config/runtime');
 
-const smtpHost = process.env.SMTP_HOST || '127.0.0.1';
-const smtpPort = Number(process.env.SMTP_PORT || 1025);
-const webUrl = process.env.WEB_URL || 'http://localhost:3000';
+let cachedTransport;
+let cachedSmtp;
 
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: false
-});
+function emailTransport() {
+  const smtp = getRuntimeConfig().smtp;
+  if (cachedTransport && cachedSmtp === smtp) return cachedTransport;
+  cachedSmtp = smtp;
+  cachedTransport = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
+    ...(smtp.user ? { auth: { user: smtp.user, pass: smtp.password } } : {})
+  });
+  return cachedTransport;
+}
 
 async function sendVerificationEmail(user, token) {
-  const verificationUrl = `${webUrl}/verify-email?token=${encodeURIComponent(token)}`;
+  const runtime = getRuntimeConfig();
+  const verificationUrl = `${runtime.webUrl}/verify-email?token=${encodeURIComponent(token)}`;
 
-  await transporter.sendMail({
-    from: 'Astitva Local <no-reply@astitva.local>',
+  await emailTransport().sendMail({
+    from: runtime.smtp.from,
     to: user.email,
     subject: 'Verify your Astitva email',
     text: [
       `Hello ${user.name},`,
       '',
-      'Verify your email address to finish setting up your local Astitva account:',
+      'Verify your email address to finish setting up your Astitva account:',
       verificationUrl,
       '',
       'This link expires in one hour.'
@@ -29,16 +37,17 @@ async function sendVerificationEmail(user, token) {
 }
 
 async function sendPasswordResetEmail(user, token) {
-  const resetUrl = `${webUrl}/reset-password?token=${encodeURIComponent(token)}`;
+  const runtime = getRuntimeConfig();
+  const resetUrl = `${runtime.webUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
-  await transporter.sendMail({
-    from: 'Astitva Local <no-reply@astitva.local>',
+  await emailTransport().sendMail({
+    from: runtime.smtp.from,
     to: user.email,
     subject: 'Reset your Astitva password',
     text: [
       `Hello ${user.name},`,
       '',
-      'Use this link to choose a new password for your local Astitva account:',
+      'Use this link to choose a new password for your Astitva account:',
       resetUrl,
       '',
       'This link expires in one hour. If you did not request it, you can ignore this message.'

@@ -16,12 +16,12 @@ class PlaidFinanceProvider {
   }
 
   configured() {
-    return Boolean(process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET && process.env.FINANCE_TOKEN_ENCRYPTION_KEY);
+    return getRuntimeConfig().financeProviderConfigured;
   }
 
   assertConfigured() {
     if (!this.configured()) {
-      throw new FinanceProviderError('PROVIDER_NOT_CONFIGURED', `Plaid ${this.environment} is not configured on the local server.`);
+      throw new FinanceProviderError('PROVIDER_NOT_CONFIGURED', `Plaid ${this.environment} is not configured on the server.`);
     }
   }
 
@@ -57,13 +57,15 @@ class PlaidFinanceProvider {
   }
 
   async createConnectionSession(userId) {
+    const runtime = getRuntimeConfig();
     const result = await this.request('/link/token/create', {
       user: { client_user_id: String(userId) },
       client_name: 'Astitva',
       products: ['transactions'],
       additional_consented_products: ['investments'],
       country_codes: ['US'],
-      language: 'en'
+      language: 'en',
+      ...(runtime.plaidRedirectUri ? { redirect_uri: runtime.plaidRedirectUri } : {})
     });
     return { sessionToken: result.link_token, expiresAt: result.expiration };
   }

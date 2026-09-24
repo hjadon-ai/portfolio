@@ -25,6 +25,16 @@ const objectId = (value) => /^[a-f0-9]{24}$/i.test(value);
 const monthValid = (value) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
+router.use((request, response, next) => {
+  if (!getRuntimeConfig().financeEnabled) {
+    return response.status(503).json({
+      error: 'Finance is not enabled in this environment.',
+      code: 'FINANCE_DISABLED'
+    });
+  }
+  next();
+});
+
 function providerResponse(response, error) {
   if (error instanceof FinanceProviderError && error.code === 'PROVIDER_NOT_CONFIGURED') {
     return response.status(503).json({ error: error.message, code: error.code });

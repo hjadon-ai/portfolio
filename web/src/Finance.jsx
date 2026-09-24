@@ -115,8 +115,17 @@ export default function Finance({ apiRequest, runtime }) {
   const [version, setVersion] = useState(0);
   const [confirmingConnection, setConfirmingConnection] = useState(false);
   const [disconnecting, setDisconnecting] = useState(null);
+  const financeDisabled = runtime?.financeProvider?.enabled === false;
+  const realFinance = runtime?.financeProvider?.environment === 'production';
+  const cloudData = runtime?.dataLocation === 'cloud';
 
   const load = useCallback(async () => {
+    if (financeDisabled) {
+      setSummary(null);
+      setConnections([]);
+      setError('');
+      return;
+    }
     const [summaryResult, connectionResult] = await Promise.all([
       apiRequest(`/api/finance/summary?month=${month}`),
       apiRequest('/api/finance/connections')
@@ -124,7 +133,7 @@ export default function Finance({ apiRequest, runtime }) {
     setSummary(summaryResult);
     setConnections(connectionResult.connections);
     setError('');
-  }, [apiRequest, month]);
+  }, [apiRequest, financeDisabled, month]);
 
   useEffect(() => {
     let active = true;
@@ -155,7 +164,7 @@ export default function Finance({ apiRequest, runtime }) {
   }
 
   async function connect() {
-    if (runtime?.environment === 'stage') {
+    if (realFinance) {
       setConfirmingConnection(true);
       return;
     }
@@ -213,12 +222,17 @@ export default function Finance({ apiRequest, runtime }) {
     await run('disconnect', () => apiRequest(`/api/finance/connections/${connection.id}`, { method: 'DELETE' }), 'Institution disconnected and local data deleted.');
   }
 
+  if (financeDisabled) return <section className="profile-content finance-page">
+    <PageHeader eyebrow="Personal / Finance" title="Finance" description="Finance is available after Plaid is enabled for Production." />
+    <StatusBanner tone="warning" role="status">Finance is disabled during the initial Production rollout. No Plaid connection or synchronization will be attempted.</StatusBanner>
+  </section>;
+
   if (accountId) return <AccountDetail accountId={accountId} apiRequest={apiRequest} busy={Boolean(busy)} reloadKey={version}
     actionError={error} actionMessage={message}
     onBack={() => setAccountId(null)} onRefresh={refresh} onRemoved={stopTracking} />;
 
   return <section className="profile-content finance-page">
-    <PageHeader eyebrow="Personal / Finance" title="Finance" description="A consolidated view from locally synchronized financial data." actions={<><Button icon={RefreshCw} type="button" disabled={Boolean(busy)} onClick={refresh}>{busy === 'sync' ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" icon={Link2} type="button" disabled={Boolean(busy)} onClick={connect}>{busy === 'connect' ? 'Opening Plaid…' : runtime?.environment === 'stage' ? 'Connect real account' : 'Connect account'}</Button></>} />
+    <PageHeader eyebrow="Personal / Finance" title="Finance" description={`A consolidated view from ${cloudData ? 'securely synchronized cloud' : 'locally synchronized'} financial data.`} actions={<><Button icon={RefreshCw} type="button" disabled={Boolean(busy)} onClick={refresh}>{busy === 'sync' ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" icon={Link2} type="button" disabled={Boolean(busy)} onClick={connect}>{busy === 'connect' ? 'Opening Plaid…' : realFinance ? 'Connect real account' : 'Connect account'}</Button></>} />
     {error && <StatusBanner tone="error" role="alert">{error}</StatusBanner>}
     {message && <StatusBanner tone="success" role="status">{message}</StatusBanner>}
     {!summary && !error && <LoadingState>Loading finances…</LoadingState>}
@@ -234,8 +248,8 @@ export default function Finance({ apiRequest, runtime }) {
       </div>
 
       <section className="finance-section">
-        <SectionHeader eyebrow="Connected locally" title="Accounts" action={<span>{summary.accountCount} accounts · {summary.connectionCount} institutions</span>} />
-        {!connections.length && <EmptyState icon={Landmark} title="No accounts connected" description={`${runtime?.environment === 'stage' ? 'Connect a real institution through Plaid Production. Synchronized values stay in the separate local Stage database.' : 'Connect a Plaid Sandbox institution to create your local view with fake financial data.'} Plaid credentials and durable access tokens stay on the server.`} action={<Button variant="primary" icon={Link2} onClick={connect} disabled={Boolean(busy)}>{runtime?.environment === 'stage' ? 'Connect real account' : 'Connect account'}</Button>} />}
+        <SectionHeader eyebrow={cloudData ? 'Connected securely' : 'Connected locally'} title="Accounts" action={<span>{summary.accountCount} accounts · {summary.connectionCount} institutions</span>} />
+        {!connections.length && <EmptyState icon={Landmark} title="No accounts connected" description={`${realFinance ? `Connect a real institution through Plaid Production. Synchronized values stay in the ${cloudData ? 'Production Atlas database' : 'separate local Stage database'}.` : 'Connect a Plaid Sandbox institution to create your local view with fake financial data.'} Plaid credentials and durable access tokens stay on the server.`} action={<Button variant="primary" icon={Link2} onClick={connect} disabled={Boolean(busy)}>{realFinance ? 'Connect real account' : 'Connect account'}</Button>} />}
         {connections.map((connection) => <article className="finance-connection" key={connection.id}>
           <header><div><h3>{connection.institutionName}</h3><p>{title(connection.status)} · Last synced {dateTime(connection.lastSuccessfulSyncAt)}</p></div>
             <button className="text-action destructive" disabled={Boolean(busy)} onClick={() => setDisconnecting(connection)}><Trash2 size={15} aria-hidden="true" /> Disconnect institution</button></header>
@@ -258,7 +272,7 @@ export default function Finance({ apiRequest, runtime }) {
 
       <section className="finance-section"><p className="eyebrow">Last ten</p><h2>Recent transactions</h2><TransactionList transactions={summary.recentTransactions} /></section>
     </>}
-    <ConfirmDialog open={confirmingConnection} title="Connect a real financial account?" description="Plaid Production will connect to the selected institution. Astitva will store synchronized values in the local Stage database." confirmLabel="Continue to Plaid" busy={Boolean(busy)} onCancel={() => setConfirmingConnection(false)} onConfirm={openConnection} />
+    <ConfirmDialog open={confirmingConnection} title="Connect a real financial account?" description={`Plaid Production will connect to the selected institution. Astitva will store synchronized values in the ${cloudData ? 'Production Atlas database' : 'local Stage database'}.`} confirmLabel="Continue to Plaid" busy={Boolean(busy)} onCancel={() => setConfirmingConnection(false)} onConfirm={openConnection} />
     <ConfirmDialog open={Boolean(disconnecting)} title="Disconnect institution?" description={disconnecting ? `${disconnecting.institutionName} and all of its locally synchronized Finance data will be deleted.` : ''} confirmLabel="Disconnect institution" busy={Boolean(busy)} onCancel={() => setDisconnecting(null)} onConfirm={() => disconnect(disconnecting)} />
   </section>;
 }

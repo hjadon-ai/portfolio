@@ -2,12 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Astitva Finance API",
-    "version": "0.7.0",
-    "description": "Local-first Finance APIs backed by Plaid Sandbox in Dev or Plaid Production in Stage, with isolated localhost MongoDB databases."
+    "version": "0.9.0",
+    "description": "Finance APIs backed by Plaid Sandbox in Dev, Plaid Production in Stage, or an optional Plaid Production connection in the cloud Production profile. Finance returns a stable 503 while disabled."
   },
   "servers": [
     {
-      "url": "http://localhost:3001"
+      "url": "http://localhost:3001",
+      "description": "Local Express server"
+    },
+    {
+      "url": "https://SERVICE_NAME.onrender.com",
+      "description": "Render Production server"
     }
   ],
   "paths": {
@@ -52,6 +57,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -91,6 +99,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       },
@@ -155,6 +166,9 @@
           },
           "502": {
             "$ref": "#/components/responses/ProviderFailure"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -216,14 +230,7 @@
             "$ref": "#/components/responses/ProviderFailure"
           },
           "503": {
-            "description": "Plaid is not configured for the active profile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -271,6 +278,9 @@
           },
           "502": {
             "$ref": "#/components/responses/ProviderFailure"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -315,6 +325,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       },
@@ -340,6 +353,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -380,6 +396,9 @@
           },
           "502": {
             "$ref": "#/components/responses/ProviderFailure"
+          },
+          "503": {
+            "$ref": "#/components/responses/FinanceDisabled"
           }
         }
       }
@@ -437,6 +456,16 @@
       },
       "ProviderFailure": {
         "description": "The active Plaid environment failed; no secrets are returned",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "FinanceDisabled": {
+        "description": "Finance is disabled for the active environment",
         "content": {
           "application/json": {
             "schema": {

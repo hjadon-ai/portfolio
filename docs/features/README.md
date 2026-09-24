@@ -21,10 +21,12 @@ This file is the current list of Astitva features.
 | F009 | [Daily Priorities](F009-daily-priorities.md) | Review | `feature/F009-daily-priorities` | Not created |
 | F010 | [Quick Notes](F010-quick-notes.md) | Approved | Not created | Not created |
 | F011 | [Application visual system](F011-application-visual-system.md) | Review | `feature/F011-application-visual-system` | Not created |
+| F012 | [Cloud production environment](infra/F012-cloud-production-environment.md) | Review | `feature/F012-cloud-production-environment` | Not created |
 
 ## Rules
 
 - Create a feature document from `FEATURE_TEMPLATE.md` before implementation.
+- Store infrastructure and deployment feature documents in `infra/`.
 - The project owner approves scope and architecture decisions.
 - Keep one feature per Git branch when Git work begins.
 - Update this table when a status, branch, or pull request changes.

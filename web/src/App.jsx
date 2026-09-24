@@ -6,9 +6,10 @@ import Finance from './Finance';
 import { AppShell, Badge, Button, EnvironmentBanner, FormField, LoadingState, PageHeader, StatCard, Surface } from './ui';
 
 const emptyForm = { name: '', email: '', password: '' };
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
 
 async function apiRequest(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
     credentials: 'include',
     ...options,
     headers: {
@@ -84,7 +85,7 @@ function AuthPanel({ mode, onModeChange, onAuthenticated, onForgotPassword }) {
         </button>
       </div>
 
-      <p className="eyebrow">Local account</p>
+      <p className="eyebrow">Private account</p>
       <h2 id="auth-title">{isSignup ? 'Create your profile.' : 'Welcome back.'}</h2>
       <form onSubmit={submit}>
         {isSignup && (
@@ -146,7 +147,7 @@ function ForgotPasswordPanel({ onBack }) {
       <button className="text-action back-action" type="button" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" /> Back to login</button>
       <p className="eyebrow">Account recovery</p>
       <h2 id="forgot-password-title">Reset your password.</h2>
-      <p className="panel-copy">Enter your verified email address. If it is eligible, Mailpit will receive a reset link.</p>
+      <p className="panel-copy">Enter your verified email address. If it is eligible, check your email for a reset link.</p>
       <form onSubmit={submit}>
         <FormField label="Email">
           <input name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
@@ -311,7 +312,7 @@ function PublicHome({ onAuthenticated }) {
           <div>
             <p className="eyebrow">Portfolio & personal workspace</p>
             <h1>Your private workspace, <em>organized around your life.</em></h1>
-            <p className="lede">Projects, health, finance, and notes in one local application that keeps you in control.</p>
+            <p className="lede">Projects, health, finance, and notes in one private application that keeps you in control.</p>
           </div>
           {mode === 'forgot-password' ? (
             <ForgotPasswordPanel onBack={() => setMode('login')} />
@@ -369,13 +370,13 @@ function Profile({ user, onLogout, runtime }) {
             <h2>{user.name}</h2>
             <p>{user.email}</p>
           </div>
-          <Badge tone="success"><CheckCircle2 size={15} aria-hidden="true" /> Local session active</Badge>
+          <Badge tone="success"><CheckCircle2 size={15} aria-hidden="true" /> Session active</Badge>
         </Surface>
 
         <section className="profile-grid" id="projects">
           <StatCard label="Projects" value="2" helper="Sample placeholders" icon={FolderKanban} accent="blue" />
           <StatCard label="Profile" value="25%" helper="Ready for your content" icon={UserRound} accent="pink" />
-          <StatCard label="Database" value="Local" helper="MongoDB connection" icon={Database} accent="purple" />
+          <StatCard label="Database" value={runtime?.dataLocation === 'cloud' ? 'Cloud' : 'Local'} helper={runtime?.dataLocation === 'cloud' ? 'MongoDB Atlas' : 'MongoDB connection'} icon={Database} accent="purple" />
         </section>
 
         <Surface className="workspace-card" id="notes">

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Astitva API",
-    "description": "Requests for the local Astitva Express server. Mailpit receives verification and password-reset messages at http://localhost:8025. Finance uses the active Dev/Sandbox or Stage/Production credentials configured only on the server. Postman keeps the login session cookie automatically.",
+    "description": "Astitva REST API collection for local Dev and Stage profiles and the Render Production profile.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -25,6 +25,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -43,6 +48,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -61,6 +71,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -85,7 +100,13 @@
           "name": "Resend verification email",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
+              }
+            ],
             "url": "{{baseUrl}}/api/auth/resend-verification"
           },
           "response": []
@@ -98,6 +119,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -116,6 +142,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -131,7 +162,13 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
+              }
+            ],
             "url": "{{baseUrl}}/api/auth/logout"
           },
           "response": []
@@ -159,6 +196,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -188,6 +230,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -206,6 +253,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -220,7 +272,13 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/diet/meals/{{mealId}}",
-            "header": []
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
+              }
+            ]
           },
           "response": []
         }
@@ -267,6 +325,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "description": "Requires PLAID_CLIENT_ID, PLAID_SECRET, and FINANCE_TOKEN_ENCRYPTION_KEY on the local server. Open Plaid Link from the Finance page to use the returned temporary token.",
@@ -286,6 +349,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "description": "Paste a fresh short-lived public token from a the active Plaid environment Link flow into plaidPublicToken. The web page normally performs this exchange automatically.",
@@ -316,6 +384,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -339,7 +412,13 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/finance/accounts/{{financeAccountId}}",
-            "header": []
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
+              }
+            ]
           },
           "response": []
         },
@@ -348,7 +427,13 @@
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/finance/connections/{{financeConnectionId}}",
-            "header": []
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
+              }
+            ]
           },
           "response": []
         }
@@ -501,6 +586,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities",
@@ -757,6 +847,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{priorityId}}",
@@ -917,7 +1012,7 @@
               "body": "{\n  \"error\": \"Email verification required.\"\n}"
             },
             {
-              "name": "Malformed item ID or item absent from this owner/date, including another account\u2019s ID.",
+              "name": "Malformed item ID or item absent from this owner/date, including another account’s ID.",
               "originalRequest": {
                 "method": "PATCH",
                 "header": [
@@ -1002,6 +1097,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{priorityId}}",
@@ -1162,7 +1262,7 @@
               "body": "{\n  \"error\": \"Email verification required.\"\n}"
             },
             {
-              "name": "Malformed item ID or item absent from this owner/date, including another account\u2019s ID.",
+              "name": "Malformed item ID or item absent from this owner/date, including another account’s ID.",
               "originalRequest": {
                 "method": "PATCH",
                 "header": [
@@ -1247,6 +1347,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{priorityId}}",
@@ -1407,7 +1512,7 @@
               "body": "{\n  \"error\": \"Email verification required.\"\n}"
             },
             {
-              "name": "Malformed item ID or item absent from this owner/date, including another account\u2019s ID.",
+              "name": "Malformed item ID or item absent from this owner/date, including another account’s ID.",
               "originalRequest": {
                 "method": "PATCH",
                 "header": [
@@ -1488,6 +1593,11 @@
               {
                 "key": "X-Time-Zone",
                 "value": "{{priorityTimeZone}}"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{priorityId}}",
@@ -1582,7 +1692,7 @@
               "body": "{\n  \"error\": \"Email verification required.\"\n}"
             },
             {
-              "name": "Malformed item ID or item absent from this owner/date, including another account\u2019s ID.",
+              "name": "Malformed item ID or item absent from this owner/date, including another account’s ID.",
               "originalRequest": {
                 "method": "DELETE",
                 "header": [
@@ -1641,6 +1751,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities",
@@ -1745,10 +1860,15 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{webUrl}}",
+                "type": "text"
               }
             ],
             "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{otherPriorityId}}",
-            "description": "Set otherPriorityId from account A, then log in as verified account B. Expect 404. Read this date as B and confirm none of A\u2019s rows appear.",
+            "description": "Set otherPriorityId from account A, then log in as verified account B. Expect 404. Read this date as B and confirm none of A’s rows appear.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"completed\": true\n}",
@@ -1761,7 +1881,7 @@
           },
           "response": [
             {
-              "name": "Malformed item ID or item absent from this owner/date, including another account\u2019s ID.",
+              "name": "Malformed item ID or item absent from this owner/date, including another account’s ID.",
               "originalRequest": {
                 "method": "PATCH",
                 "header": [
@@ -1775,7 +1895,7 @@
                   }
                 ],
                 "url": "{{baseUrl}}/api/priorities/days/{{priorityDate}}/priorities/{{otherPriorityId}}",
-                "description": "Set otherPriorityId from account A, then log in as verified account B. Expect 404. Read this date as B and confirm none of A\u2019s rows appear.",
+                "description": "Set otherPriorityId from account A, then log in as verified account B. Expect 404. Read this date as B and confirm none of A’s rows appear.",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"completed\": true\n}",

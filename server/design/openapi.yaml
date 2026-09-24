@@ -3,11 +3,16 @@ openapi: 3.0.3
 info:
   title: Astitva API
   version: 0.9.0
-  description: Local REST API for the Astitva Dev or Stage profile.
+  description: REST API for local Dev and Stage profiles or the Render Production profile.
 
 servers:
   - url: http://localhost:3001
     description: Local Express server
+  - url: https://{service}.onrender.com
+    description: Render Production server
+    variables:
+      service:
+        default: SERVICE_NAME
 
 tags:
   - name: System
@@ -58,7 +63,7 @@ paths:
   /api/auth/signup:
     post:
       tags: [Authentication]
-      summary: Create an unverified local account and send a verification email
+      summary: Create an unverified account and send a verification email
       operationId: signup
       requestBody:
         required: true
@@ -75,12 +80,20 @@ paths:
                 $ref: "#/components/schemas/SignupResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Production signup requires an invited email address.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: An account with the email already exists.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   /api/auth/verify-email:
     post:
@@ -143,6 +156,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   /api/auth/login:
     post:
@@ -168,6 +183,8 @@ paths:
                 $ref: "#/components/schemas/UserResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   /api/auth/me:
     get:
@@ -206,6 +223,8 @@ paths:
                 $ref: "#/components/schemas/MessageResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   /api/auth/reset-password:
     post:
@@ -251,7 +270,7 @@ components:
       type: apiKey
       in: cookie
       name: astitva_dev_session
-      description: Dev uses astitva_dev_session; Stage uses astitva_stage_session.
+      description: Dev, Stage, and Production use isolated cookie names. Production uses Secure and SameSite=None.
 
   responses:
     BadRequest:
@@ -266,11 +285,17 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: The Production request rate limit was exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
 
   schemas:
     HealthResponse:
       type: object
-      required: [status, message, environment, financeProvider]
+      required: [status, message, environment, dataLocation, financeProvider]
       properties:
         status:
           type: string
@@ -280,10 +305,13 @@ components:
           example: Astitva server is running
         environment:
           type: string
-          enum: [dev, stage]
+          enum: [dev, stage, production]
+        dataLocation:
+          type: string
+          enum: [local, cloud]
         financeProvider:
           type: object
-          required: [name, environment, configured]
+          required: [name, environment, enabled, configured]
           properties:
             name:
               type: string
@@ -291,6 +319,8 @@ components:
             environment:
               type: string
               enum: [sandbox, production]
+            enabled:
+              type: boolean
             configured:
               type: boolean
 

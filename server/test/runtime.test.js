@@ -8,6 +8,23 @@ const base = {
   FINANCE_TOKEN_ENCRYPTION_KEY: '11'.repeat(32)
 };
 
+const productionBase = {
+  ASTITVA_ENV: 'production',
+  MONGODB_URL: 'mongodb+srv://astitva-user:password@astitva0.example.mongodb.net/astitva_prod?retryWrites=true&w=majority',
+  WEB_URL: 'https://astitva-example.web.app',
+  CORS_ORIGINS: 'https://astitva-example.web.app',
+  SESSION_COOKIE_NAME: 'astitva_prod_session',
+  INVITED_EMAILS: 'Owner@Example.com, second@example.com',
+  PLAID_ENABLED: 'false',
+  PLAID_ENV: 'production',
+  SMTP_HOST: 'smtp.example.com',
+  SMTP_PORT: '587',
+  SMTP_SECURE: 'false',
+  SMTP_USER: 'smtp-user',
+  SMTP_PASSWORD: 'smtp-password',
+  EMAIL_FROM: 'Astitva <noreply@example.com>'
+};
+
 test('Dev selects Sandbox, the dev database, and its own cookie', () => {
   const config = validateRuntimeEnvironment({
     ...base,
@@ -51,4 +68,64 @@ test('runtime validation rejects placeholder credentials and invalid keys', () =
   assert.throws(() => validateRuntimeEnvironment({
     ...base, ASTITVA_ENV: 'dev', PLAID_ENV: 'sandbox', MONGODB_URL: 'mongodb://127.0.0.1:27017/astitva', FINANCE_TOKEN_ENCRYPTION_KEY: 'short'
   }), /32 bytes/);
+});
+
+test('Production accepts Atlas and disables Plaid without requiring Plaid secrets', () => {
+  const config = validateRuntimeEnvironment(productionBase);
+  assert.equal(config.databaseName, 'astitva_prod');
+  assert.equal(config.financeEnabled, false);
+  assert.equal(config.financeProviderConfigured, false);
+  assert.deepEqual(config.invitedEmails, ['owner@example.com', 'second@example.com']);
+  assert.deepEqual(config.sessionCookieOptions, {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+    path: '/'
+  });
+});
+
+test('Production rejects local data, insecure origins, reused cookies, and missing invitations', () => {
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    MONGODB_URL: 'mongodb://127.0.0.1:27017/astitva_prod'
+  }), /MongoDB Atlas/);
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    WEB_URL: 'http://astitva-example.web.app'
+  }), /HTTPS origin/);
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    SESSION_COOKIE_NAME: 'astitva_dev_session'
+  }), /unique production cookie/);
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    INVITED_EMAILS: ''
+  }), /INVITED_EMAILS/);
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    WEB_URL: 'https://PROJECT_ID.web.app',
+    CORS_ORIGINS: 'https://PROJECT_ID.web.app'
+  }), /HTTPS origin/);
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    MONGODB_URL: 'mongodb+srv://APP_USER:APP_PASSWORD@CLUSTER.mongodb.net/astitva_prod'
+  }), /placeholders/);
+});
+
+test('Production requires Plaid credentials, encryption, and redirect configuration only when enabled', () => {
+  assert.throws(() => validateRuntimeEnvironment({
+    ...productionBase,
+    PLAID_ENABLED: 'true'
+  }), /PLAID_CLIENT_ID/);
+
+  const config = validateRuntimeEnvironment({
+    ...productionBase,
+    ...base,
+    PLAID_ENV: 'production',
+    PLAID_ENABLED: 'true',
+    PLAID_REDIRECT_URI: 'https://astitva-example.web.app'
+  });
+  assert.equal(config.financeEnabled, true);
+  assert.equal(config.financeProviderConfigured, true);
+  assert.equal(config.plaidRedirectUri, 'https://astitva-example.web.app');
 });

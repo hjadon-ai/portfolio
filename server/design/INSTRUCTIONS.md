@@ -18,6 +18,8 @@ Review the F009 Daily Priorities OpenAPI, Postman requests, and `dailyPriorityDa
 
 F005 is ready for manual review: Diet is accessible from the verified profile, with meal entry, daily totals, fiber, and editable targets. See `../../docs/features/F005-daily-diet-tracking.md` for manual checks.
 
+Use `Astitva.production.postman_environment.json` only after replacing its provider-domain placeholders. Production unsafe requests must include the exact `Origin` header, and Finance remains disabled during the core rollout.
+
 F006 is ready for manual review. `finance.openapi.json` defines the Finance endpoints and the Postman collection contains matching local requests.
 
 F007 is ready for manual review. Use `Astitva.dev.postman_environment.json` for Dev and `Astitva.stage.postman_environment.json` for Stage; neither contains provider credentials or access tokens.

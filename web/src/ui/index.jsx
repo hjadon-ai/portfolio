@@ -142,10 +142,11 @@ export function ConfirmDialog({ open, title, description, confirmLabel, busy, on
 
 export function EnvironmentBanner({ runtime }) {
   if (!runtime) return null;
+  const production = runtime.environment === 'production';
   const stage = runtime.environment === 'stage';
   return (
-    <div className={classes('environment-banner', stage ? 'stage' : 'dev')} role="status">
-      {stage ? 'STAGE · PLAID PRODUCTION · REAL FINANCIAL DATA' : 'DEV · PLAID SANDBOX · FAKE FINANCIAL DATA'}
+    <div className={classes('environment-banner', production ? 'production' : stage ? 'stage' : 'dev')} role="status">
+      {production ? 'PRODUCTION · CLOUD DATA · PLAID PRODUCTION' : stage ? 'STAGE · PLAID PRODUCTION · REAL FINANCIAL DATA' : 'DEV · PLAID SANDBOX · FAKE FINANCIAL DATA'}
     </div>
   );
 }

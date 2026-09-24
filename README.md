@@ -3,7 +3,7 @@ I am building a simple single page website
 Idea is to build a web application powered by backend
 The development sould be very slow
 I will take all solution architect based decisions
-do not deploy application anywhere keep it on local machine
+Do not deploy the application without an explicit deployment request. Local implementation and validation come first.
 
 Task:
 Create folder structure for the web application
@@ -88,3 +88,5 @@ The private page supports up to three priorities per day, completion progress,
 past-date navigation, inline editing and deletion, and local MongoDB persistence.
 The automated MongoDB ownership and concurrency suite and the web build pass. See
 `docs/features/F009-daily-priorities.md` for the manual browser checklist.
+
+F012 adds a locally reviewable Production profile and deployment configuration for Firebase Hosting, Render, MongoDB Atlas, invite-only signup, and provider-neutral SMTP. It does not deploy anything. See `docs/infra/production.md`.

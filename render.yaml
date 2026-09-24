@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: astitva-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm run start:production
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: NODE_VERSION
+        value: 22.20.0
+      - key: ASTITVA_ENV
+        value: production
+      - key: MONGODB_URL
+        sync: false
+      - key: WEB_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SESSION_COOKIE_NAME
+        value: astitva_prod_session
+      - key: INVITED_EMAILS
+        sync: false
+      - key: PLAID_ENABLED
+        value: "false"
+      - key: PLAID_ENV
+        value: production
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

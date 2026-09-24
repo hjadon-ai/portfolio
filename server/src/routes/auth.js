@@ -7,6 +7,7 @@ const EmailVerificationToken = require('../models/EmailVerificationToken');
 const PasswordResetToken = require('../models/PasswordResetToken');
 const { sendPasswordResetEmail, sendVerificationEmail } = require('../services/email');
 const { getRuntimeConfig } = require('../config/runtime');
+const { createRateLimit } = require('../middleware/security');
 
 const router = express.Router();
 const cookieName = () => getRuntimeConfig().sessionCookieName;
@@ -16,6 +17,9 @@ const passwordResetDuration = 60 * 60 * 1000;
 const passwordResetWindow = 24 * 60 * 60 * 1000;
 const passwordResetLimit = 2;
 const forgotPasswordMessage = 'If an eligible account exists, a reset email has been sent.';
+const signupRateLimit = createRateLimit({ max: 5, windowMs: 60 * 60 * 1000 });
+const loginRateLimit = createRateLimit({ max: 10, windowMs: 15 * 60 * 1000 });
+const emailRateLimit = createRateLimit({ max: 5, windowMs: 60 * 60 * 1000 });
 
 function publicUser(user) {
   return {
@@ -99,10 +103,10 @@ function hashToken(token) {
 }
 
 function clearSessionCookie(response) {
-  response.clearCookie(cookieName(), { httpOnly: true, sameSite: 'lax' });
+  response.clearCookie(cookieName(), getRuntimeConfig().sessionCookieOptions);
 }
 
-router.post('/signup', async (request, response) => {
+router.post('/signup', signupRateLimit, async (request, response) => {
   const name = typeof request.body.name === 'string' ? request.body.name.trim() : '';
   const email = typeof request.body.email === 'string' ? request.body.email.trim().toLowerCase() : '';
   const password = typeof request.body.password === 'string' ? request.body.password : '';
@@ -110,6 +114,14 @@ router.post('/signup', async (request, response) => {
   if (!name || !email || password.length < 8) {
     return response.status(400).json({
       error: 'Name, email, and a password of at least 8 characters are required.'
+    });
+  }
+
+  const runtime = getRuntimeConfig();
+  if (runtime.isProduction && !runtime.invitedEmails.includes(email)) {
+    return response.status(403).json({
+      error: 'This email address is not invited to Astitva.',
+      code: 'INVITATION_REQUIRED'
     });
   }
 
@@ -141,7 +153,7 @@ router.post('/signup', async (request, response) => {
   }
 });
 
-router.post('/login', async (request, response) => {
+router.post('/login', loginRateLimit, async (request, response) => {
   const email = typeof request.body.email === 'string' ? request.body.email.trim().toLowerCase() : '';
   const password = typeof request.body.password === 'string' ? request.body.password : '';
   const user = await User.findOne({ email });
@@ -158,8 +170,7 @@ router.post('/login', async (request, response) => {
   });
 
   response.cookie(cookieName(), token, {
-    httpOnly: true,
-    sameSite: 'lax',
+    ...getRuntimeConfig().sessionCookieOptions,
     maxAge: sessionDuration
   });
   return response.status(200).json({ user: publicUser(user) });
@@ -206,7 +217,7 @@ router.post('/verify-email', async (request, response) => {
   });
 });
 
-router.post('/resend-verification', async (request, response) => {
+router.post('/resend-verification', emailRateLimit, async (request, response) => {
   const user = await authenticatedUser(request, response);
   if (!user) {
     return response.status(401).json({ error: 'Authentication required.' });
@@ -231,7 +242,7 @@ router.post('/resend-verification', async (request, response) => {
   });
 });
 
-router.post('/forgot-password', async (request, response) => {
+router.post('/forgot-password', emailRateLimit, async (request, response) => {
   const email = typeof request.body.email === 'string' ? request.body.email.trim().toLowerCase() : '';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return response.status(400).json({ error: 'A valid email address is required.' });

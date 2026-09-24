@@ -1,62 +1,60 @@
-const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
+const { createApp } = require('./app');
 const { connectDatabase } = require('./config/database');
 const { getRuntimeConfig } = require('./config/runtime');
 const { FinanceConnection } = require('./models/Finance');
-const authRoutes = require('./routes/auth');
-const DailyPriorityDay = require('./models/DailyPriorityDay');
 
-const app = express();
-const port = Number(process.env.PORT || 3001);
-const runtime = getRuntimeConfig();
-
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
-}));
-app.use(cookieParser());
-// Priorities parses JSON after its session gate and handles malformed bodies locally.
-app.use('/api/priorities', require('./routes/priorities'));
-app.use(express.json());
-
-app.get('/api/health', (request, response) => {
-  response.status(200).json({
-    status: 'ok',
-    message: 'Astitva server is running',
-    environment: runtime.environment,
-    financeProvider: {
-      name: runtime.financeProvider,
-      environment: runtime.plaidEnvironment,
-      configured: runtime.financeProviderConfigured
-    }
-  });
-});
-
-app.use('/api/auth', authRoutes);
-app.use('/api/diet', require('./routes/diet'));
-app.use('/api/finance', require('./routes/finance'));
-
-app.use((error, request, response, next) => {
-  console.error('Unhandled API error:', error.message);
-  response.status(500).json({ error: 'The server could not complete this request.' });
-});
+async function createIndexes() {
+  await Promise.all(Object.values(mongoose.models).map((model) => model.createIndexes()));
+}
 
 async function startServer() {
-  await connectDatabase();
-  await DailyPriorityDay.createIndexes();
-  await FinanceConnection.updateMany(
-    { providerEnvironment: { $exists: false } },
-    { $set: { providerEnvironment: runtime.plaidEnvironment } }
-  );
-  await FinanceConnection.syncIndexes();
+  const runtime = getRuntimeConfig();
+  const port = Number(process.env.PORT || 3001);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('PORT must be a valid TCP port.');
+  }
+  const host = runtime.isProduction ? '0.0.0.0' : '127.0.0.1';
+  const app = createApp();
 
-  app.listen(port, () => {
-    console.log(`Astitva ${runtime.environment} server running at http://localhost:${port}`);
+  await connectDatabase();
+  if (runtime.financeEnabled) {
+    await FinanceConnection.updateMany(
+      { providerEnvironment: { $exists: false } },
+      { $set: { providerEnvironment: runtime.plaidEnvironment } }
+    );
+  }
+  await createIndexes();
+
+  const server = app.listen(port, host, () => {
+    console.log(`Astitva ${runtime.environment} server listening on ${host}:${port}`);
+  });
+
+  let shuttingDown = false;
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`Received ${signal}; shutting down.`);
+    server.close(async (error) => {
+      try {
+        await mongoose.disconnect();
+      } finally {
+        process.exit(error ? 1 : 0);
+      }
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
+  }
+
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
+  return server;
+}
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error('Unable to start Astitva server:', error.message);
+    process.exit(1);
   });
 }
 
-startServer().catch((error) => {
-  console.error('Unable to start Astitva server:', error.message);
-  process.exit(1);
-});
+module.exports = { startServer };
