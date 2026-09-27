@@ -15,13 +15,13 @@ The public copy is deployed to Firebase Hosting at `https://harendra-play.web.ap
 
 ## Edit content
 
-1. Open **Edit content** in the header.
+1. Run the app locally with `npm run dev`, then open **Edit content** in the header. The first time, set a passphrase of at least 12 characters in your own browser. Later visits require that passphrase again.
 2. Edit shared facts under Profile, Achievements, Experience, Case studies, Leadership, Skills, Credentials, and AI practice.
 3. Select a role in the header, then use **Role versions** to change its summary, focus, section order, visible entries, entry order, and featured case study. **New view** creates another role presentation from the selected version without copying master entries.
 4. Use **View portfolio** to preview. Changes are automatically kept as a draft in this browser.
 5. Use **Export JSON** to download the current data. Keep that file as the durable copy. To make it the bundled default for this project, replace `src/data/portfolio.json` with the exported file. **Import JSON** restores an exported copy into the editor.
 
-Browser storage is only a convenience draft. Clearing site data can remove it. There is no login or backend; anyone with access to the local app and files can edit or read the content.
+The editor is omitted from production builds. The local passphrase is never put in source files or the public build; the browser stores only a salted PBKDF2 verifier. It is a convenience lock, not strong authentication: someone with local file or browser developer-tool access can bypass client-side checks. Do not enter the passphrase into chat or browser automation. Browser storage also holds the draft, so clearing site data can remove both the verifier and unsaved edits. Export JSON before clearing it.
 
 ## Content structure
 

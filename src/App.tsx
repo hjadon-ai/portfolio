@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BriefcaseBusiness, Check, ChevronDown, ChevronRight, Download, ExternalLink, FileDown, FileUp, Layers3, Linkedin, Mail, MapPin, Menu, Pencil, Plus, RotateCcw, Save, Search, ShieldCheck, Sparkles, Trash2, TrendingDown, Users, X } from 'lucide-react'
 import seed from './data/portfolio.json'
+import EditorGate from './EditorGate'
 import type { Achievement, CaseStudy, Experience, LeadershipItem, PortfolioData, SectionId, SkillGroup, Version } from './types'
 
 const DRAFT_KEY = 'harendra-portfolio-draft-v1'
 const VIEW_KEY = 'harendra-portfolio-view-v1'
+const LOCAL_EDITOR = import.meta.env.DEV && ['localhost', '127.0.0.1'].includes(window.location.hostname)
 const sectionNames: Record<SectionId, string> = { impact: 'Selected impact', experience: 'Experience', work: 'Selected work', leadership: 'Leadership', ai: 'AI-assisted engineering', skills: 'Capabilities', credentials: 'Education & credentials' }
 const seedData = seed as PortfolioData
 
 function initialData(): PortfolioData {
+  if (!LOCAL_EDITOR) return structuredClone(seedData)
   try {
     const saved = localStorage.getItem(DRAFT_KEY)
-    if (saved) return validateData(JSON.parse(saved))
+    if (saved) {
+      const draft = validateData(JSON.parse(saved))
+      if (draft.content.profile.website === 'https://harendra-play.web.app') draft.content.profile.website = 'https://astitva-live.web.app/'
+      return draft
+    }
   } catch { /* Fall back to bundled data. */ }
   return structuredClone(seedData)
 }
@@ -52,6 +59,7 @@ function App() {
   const [data, setData] = useState<PortfolioData>(initialData)
   const [versionId, setVersionId] = useState(() => localStorage.getItem(VIEW_KEY) || 'master')
   const [editing, setEditing] = useState(false)
+  const [gateOpen, setGateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedCase, setSelectedCase] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
@@ -59,7 +67,7 @@ function App() {
   const fileInput = useRef<HTMLInputElement>(null)
   const version = data.versions.find(v => v.id === versionId) || data.versions[0]
 
-  useEffect(() => { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)) }, [data])
+  useEffect(() => { if (LOCAL_EDITOR) localStorage.setItem(DRAFT_KEY, JSON.stringify(data)) }, [data])
   useEffect(() => { localStorage.setItem(VIEW_KEY, version.id) }, [version.id])
 
   function update(next: PortfolioData) { setData(next); setDirty(true) }
@@ -85,22 +93,22 @@ function App() {
   return <div className="app-shell">
     <header className="site-header">
       <div className="header-inner container">
-        <button className="brand" onClick={() => { setEditing(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Harendra Kumar, back to top"><span className="brand-mark">H<span>.</span></span><span className="brand-name">Harendra Kumar</span></button>
+        <button className="brand" onClick={() => { setEditing(false); setGateOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Harendra Kumar, back to top"><span className="brand-mark">H<span>.</span></span><span className="brand-name">Harendra Kumar</span></button>
         <nav className="desktop-nav" aria-label="Main navigation">
-          {!editing && <><a href="#work">Work</a><a href="#experience">Experience</a><a href="#leadership">Leadership</a><a href="#skills">Skills</a><a href={data.content.profile.website} target="_blank" rel="noreferrer">Astitva ↗</a></>}
+          {!editing && !gateOpen && <><a href="#work">Work</a><a href="#experience">Experience</a><a href="#leadership">Leadership</a><a href="#skills">Skills</a><a href={data.content.profile.website} target="_blank" rel="noreferrer">Astitva ↗</a></>}
         </nav>
         <div className="header-actions">
           <div className="view-picker"><span className="picker-label">VIEWING AS</span><button className="view-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}>{version.label}<ChevronDown size={15}/></button>
             {menuOpen && <div className="view-menu">{data.versions.map(v => <button key={v.id} className={v.id === version.id ? 'active' : ''} onClick={() => changeVersion(v.id)}><span>{v.label}</span>{v.id === version.id && <Check size={15}/>}</button>)}</div>}
           </div>
-          <button className={`edit-button ${editing ? 'active' : ''}`} onClick={() => { setEditing(!editing); setMenuOpen(false); window.scrollTo({ top: 0 }) }}>{editing ? <><ArrowLeft size={15}/> View portfolio</> : <><Pencil size={14}/> Edit content</>}</button>
+          {LOCAL_EDITOR && <button className={`edit-button ${editing || gateOpen ? 'active' : ''}`} onClick={() => { if (editing || gateOpen) { setEditing(false); setGateOpen(false) } else { setGateOpen(true) } setMenuOpen(false); window.scrollTo({ top: 0 }) }}>{editing || gateOpen ? <><ArrowLeft size={15}/> View portfolio</> : <><Pencil size={14}/> Edit content</>}</button>}
           <button className="mobile-menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Choose portfolio view"><Menu size={22}/></button>
         </div>
       </div>
     </header>
 
-    {editing ? <Editor data={data} version={version} mutate={mutate} selectVersion={setVersionId} exportJson={exportJson} importClick={() => fileInput.current?.click()} notice={notice} dirty={dirty} reset={() => { if (window.confirm('Replace your browser draft with the bundled resume content? Export first if you need your edits.')) { setData(structuredClone(seedData)); setVersionId('master'); setDirty(false); setNotice('Restored bundled resume content.') } }} /> : <Portfolio data={data} version={version} selectedCase={selectedCase} setSelectedCase={setSelectedCase} />}
-    <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={event => importJson(event.target.files?.[0])}/>
+    {LOCAL_EDITOR && gateOpen ? <EditorGate onUnlock={() => { setGateOpen(false); setEditing(true) }} onCancel={() => setGateOpen(false)}/> : LOCAL_EDITOR && editing ? <Editor data={data} version={version} mutate={mutate} selectVersion={setVersionId} exportJson={exportJson} importClick={() => fileInput.current?.click()} notice={notice} dirty={dirty} reset={() => { if (window.confirm('Replace your browser draft with the bundled resume content? Export first if you need your edits.')) { setData(structuredClone(seedData)); setVersionId('master'); setDirty(false); setNotice('Restored bundled resume content.') } }} /> : <Portfolio data={data} version={version} selectedCase={selectedCase} setSelectedCase={setSelectedCase} />}
+    {LOCAL_EDITOR && <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={event => importJson(event.target.files?.[0])}/>}
   </div>
 }
 
