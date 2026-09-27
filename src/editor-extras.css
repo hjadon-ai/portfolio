@@ -1,0 +1,6 @@
+.version-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.delete-version { color: #ad6b5c; }
+@media (max-width: 760px) {
+  .collection-head { flex-wrap: wrap; }
+  .version-actions { margin-bottom: 16px; }
+}

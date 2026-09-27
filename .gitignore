@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+*.local
+.firebase/
+firebase-debug.log
+tsconfig.tsbuildinfo
+Harendra_Kumar_Aug-2026.pdf
