@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BriefcaseBusiness, Check, ChevronDown, ChevronRight, Download, ExternalLink, FileDown, FileUp, Layers3, Linkedin, Mail, MapPin, Menu, Pencil, Plus, RotateCcw, Save, Search, ShieldCheck, Sparkles, Trash2, TrendingDown, Users, X } from 'lucide-react'
 import seed from './data/portfolio.json'
 import EditorGate from './EditorGate'
+import EngineeringDiagram from './EngineeringDiagram'
 import type { Achievement, CaseStudy, Experience, LeadershipItem, PortfolioData, SectionId, SkillGroup, Version } from './types'
 
 const DRAFT_KEY = 'harendra-portfolio-draft-v1'
@@ -55,12 +56,19 @@ function ordered<T extends { id: string }>(items: T[], ids: string[]) {
   return ids.map(id => items.find(item => item.id === id)).filter((item): item is T => Boolean(item))
 }
 
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+}
+
 function App() {
   const [data, setData] = useState<PortfolioData>(initialData)
   const [versionId, setVersionId] = useState(() => localStorage.getItem(VIEW_KEY) || 'master')
   const [editing, setEditing] = useState(false)
   const [gateOpen, setGateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sectionsOpen, setSectionsOpen] = useState(false)
+  const roleTrigger = useRef<HTMLButtonElement>(null)
+  const sectionsTrigger = useRef<HTMLButtonElement>(null)
   const [selectedCase, setSelectedCase] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
   const [dirty, setDirty] = useState(false)
@@ -70,9 +78,21 @@ function App() {
   useEffect(() => { if (LOCAL_EDITOR) localStorage.setItem(DRAFT_KEY, JSON.stringify(data)) }, [data])
   useEffect(() => { localStorage.setItem(VIEW_KEY, version.id) }, [version.id])
 
+  useEffect(() => {
+    function dismiss(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      if (menuOpen) { setMenuOpen(false); roleTrigger.current?.focus() }
+      if (sectionsOpen) { setSectionsOpen(false); sectionsTrigger.current?.focus() }
+    }
+    window.addEventListener('keydown', dismiss)
+    return () => window.removeEventListener('keydown', dismiss)
+  }, [menuOpen, sectionsOpen])
+
+  const navigation = ([['work', 'Work'], ['experience', 'Experience'], ['leadership', 'Leadership'], ['skills', 'Skills']] as const).filter(([id]) => version.visibleSections.includes(id))
+
   function update(next: PortfolioData) { setData(next); setDirty(true) }
   function mutate(fn: (draft: PortfolioData) => void) { const next = structuredClone(data); fn(next); update(next) }
-  function changeVersion(id: string) { setVersionId(id); setMenuOpen(false); setSelectedCase(null); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  function changeVersion(id: string) { setVersionId(id); setMenuOpen(false); setSelectedCase(null); setSectionsOpen(false); roleTrigger.current?.focus(); scrollToTop() }
   function exportJson() {
     const blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -91,23 +111,27 @@ function App() {
   }
 
   return <div className="app-shell">
+    <a className="skip-link" href="#portfolio-content">Skip to content</a>
     <header className="site-header">
       <div className="header-inner container">
-        <button className="brand" onClick={() => { setEditing(false); setGateOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Harendra Kumar, back to top"><span className="brand-mark">H<span>.</span></span><span className="brand-name">Harendra Kumar</span></button>
+        <button className="brand" onClick={() => { setEditing(false); setGateOpen(false); scrollToTop() }} aria-label="Harendra Kumar, back to top"><span className="brand-mark">H<span>.</span></span><span className="brand-name">Harendra Kumar</span></button>
         <nav className="desktop-nav" aria-label="Main navigation">
-          {!editing && !gateOpen && <><a href="#work">Work</a><a href="#experience">Experience</a><a href="#leadership">Leadership</a><a href="#skills">Skills</a><a href={data.content.profile.website} target="_blank" rel="noreferrer">Astitva ↗</a></>}
+          {!editing && !gateOpen && <>{navigation.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}<a href={data.content.profile.website} target="_blank" rel="noreferrer">Astitva ↗</a></>}
         </nav>
         <div className="header-actions">
-          <div className="view-picker"><span className="picker-label">VIEWING AS</span><button className="view-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}>{version.label}<ChevronDown size={15}/></button>
-            {menuOpen && <div className="view-menu">{data.versions.map(v => <button key={v.id} className={v.id === version.id ? 'active' : ''} onClick={() => changeVersion(v.id)}><span>{v.label}</span>{v.id === version.id && <Check size={15}/>}</button>)}</div>}
+          <div className="view-picker"><span className="picker-label">VIEWING AS</span><button ref={roleTrigger} className="view-button" onClick={() => { setMenuOpen(!menuOpen); setSectionsOpen(false) }} aria-expanded={menuOpen} aria-controls="role-choices">{version.label}<ChevronDown size={15}/></button>
+            {menuOpen && <div className="view-menu" id="role-choices">{data.versions.map(v => <button key={v.id} className={v.id === version.id ? 'active' : ''} onClick={() => changeVersion(v.id)}><span>{v.label}</span>{v.id === version.id && <Check size={15}/>}</button>)}</div>}
           </div>
           {LOCAL_EDITOR && <button className={`edit-button ${editing || gateOpen ? 'active' : ''}`} onClick={() => { if (editing || gateOpen) { setEditing(false); setGateOpen(false) } else { setGateOpen(true) } setMenuOpen(false); window.scrollTo({ top: 0 }) }}>{editing || gateOpen ? <><ArrowLeft size={15}/> View portfolio</> : <><Pencil size={14}/> Edit content</>}</button>}
-          <button className="mobile-menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Choose portfolio view"><Menu size={22}/></button>
+          {!editing && !gateOpen && <button ref={sectionsTrigger} className="mobile-menu-button" onClick={() => { setSectionsOpen(!sectionsOpen); setMenuOpen(false) }} aria-label="Section navigation" aria-expanded={sectionsOpen} aria-controls="mobile-sections"><Menu size={22}/></button>}
         </div>
       </div>
+      {sectionsOpen && !editing && !gateOpen && <nav id="mobile-sections" className="mobile-sections" aria-label="Section navigation">{navigation.map(([id, label]) => <a key={id} href={`#${id}`} onClick={event => { event.preventDefault(); setSectionsOpen(false); const target = document.getElementById(id); target?.focus({ preventScroll: true }); target?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); window.history.replaceState(null, '', `#${id}`) }}>{label}</a>)}<a href={data.content.profile.website} target="_blank" rel="noreferrer">Astitva ↗</a></nav>}
     </header>
 
+    <div id="portfolio-content" tabIndex={-1}>
     {LOCAL_EDITOR && gateOpen ? <EditorGate onUnlock={() => { setGateOpen(false); setEditing(true) }} onCancel={() => setGateOpen(false)}/> : LOCAL_EDITOR && editing ? <Editor data={data} version={version} mutate={mutate} selectVersion={setVersionId} exportJson={exportJson} importClick={() => fileInput.current?.click()} notice={notice} dirty={dirty} reset={() => { if (window.confirm('Replace your browser draft with the bundled resume content? Export first if you need your edits.')) { setData(structuredClone(seedData)); setVersionId('master'); setDirty(false); setNotice('Restored bundled resume content.') } }} /> : <Portfolio data={data} version={version} selectedCase={selectedCase} setSelectedCase={setSelectedCase} />}
+    </div>
     {LOCAL_EDITOR && <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={event => importJson(event.target.files?.[0])}/>}
   </div>
 }
@@ -126,14 +150,8 @@ function Portfolio({ data, version, selectedCase, setSelectedCase }: { data: Por
           <div className="hero-actions"><a className="primary-button" href="#work">Explore my work <ArrowRight size={17}/></a><a className="text-button" href={`mailto:${content.profile.email}`}>Get in touch <ArrowRight size={16}/></a></div>
           <div className="hero-meta"><span><MapPin size={15}/>{content.profile.location}</span><span className="meta-divider"/><span>{content.profile.availability}</span></div>
         </div>
-        <div className="hero-visual" aria-label="Portfolio focus areas">
-          <div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="orbit orbit-three"/>
-          <div className="visual-center"><div className="visual-initials">HK<span>.</span></div><small>IDEAS INTO IMPACT</small></div>
-          <div className="orbit-tag tag-one"><Layers3 size={16}/> Architecture</div>
-          <div className="orbit-tag tag-two"><BriefcaseBusiness size={16}/> Engineering</div>
-          <div className="orbit-tag tag-three"><Users size={16}/> Leadership</div>
-          <div className="visual-corner">01 / 03</div>
-        </div>
+        <EngineeringDiagram title="From understanding to review" caption="An illustration of engineering practice." items={['Understand', 'Design', 'Build', 'Review'].map(label => ({ label }))}/>
+
       </div>
       <div className="focus-strip"><span>FOCUS AREAS</span><div>{version.focus.map(item => <span className="focus-item" key={item}><span className="focus-dot"/>{item}</span>)}</div></div>
     </section>
@@ -141,11 +159,11 @@ function Portfolio({ data, version, selectedCase, setSelectedCase }: { data: Por
     {version.sectionOrder.filter(id => version.visibleSections.includes(id)).map((id, sectionIndex) => {
       const sectionNumber = String(sectionIndex + 1).padStart(2, '0')
       if (id === 'impact') return <section className="section impact-section" id="impact" key={id}><div className="container"><SectionHead number={sectionNumber} kicker="A snapshot" title="Impact in focus" intro="A few outcomes and experiences that shape how I work."/><div className="impact-grid">{ordered(content.achievements, version.achievementIds).map((item, index) => <article className="impact-card" key={item.id}><div className="impact-top"><span className="impact-index">0{index + 1}</span><ImpactIcon item={item}/></div><strong className="impact-metric">{item.metric}</strong><h3>{item.title}</h3><p>{item.detail}</p></article>)}</div></div></section>
-      if (id === 'work') return <section className="section work-section" id="work" key={id}><div className="container"><SectionHead number={sectionNumber} kicker="Selected work" title="Systems built for the real world" intro="Architecture and engineering work across commerce, supply chain, and inventory."/><div className="case-list">{caseStudies.map((item, index) => <article className={`case-card accent-${item.accent}`} key={item.id}><div className="case-number">0{index + 1} <span>/ 0{caseStudies.length}</span></div><div className="case-body"><div className="case-overline">{item.organization}<span>·</span>{item.category}</div><h3>{item.title}</h3><p>{item.description}</p><div className="case-tags">{item.technologies.slice(0, 4).map(t => <span key={t}>{t}</span>)}</div></div><button className="case-open" onClick={() => setSelectedCase(item.id)} aria-label={`Read ${item.title} case study`}><ArrowRight size={20}/></button></article>)}</div>{featured && <div className="work-note"><span className="note-symbol">✳</span><span>Featured perspective: <strong>{featured.title}</strong> — {featured.outcome}</span></div>}</div></section>
-      if (id === 'experience') return <section className="section experience-section" id="experience" key={id}><div className="container"><SectionHead number={sectionNumber} kicker="Career journey" title="Experience" intro="From hands-on engineering to architecture and technical leadership."/><div className="timeline">{ordered(content.experiences, version.experienceIds).map((item, index) => <ExperienceRow item={item} key={item.id} index={index}/>)}</div></div></section>
-      if (id === 'leadership') return <section className="section leadership-section" id="leadership" key={id}><div className="container leadership-layout"><div><SectionHead number={sectionNumber} kicker="Beyond the architecture" title="Leading through clarity and ownership" intro="Technical direction works best when teams have context, trust, and room to grow."/><div className="leadership-quote">Architecture, delivery, mentoring, and production ownership are connected parts of the work.</div></div><div className="leadership-list">{ordered(content.leadership, version.leadershipIds).map((item, i) => <div className="leadership-item" key={item.id}><span className="leadership-count">0{i + 1}</span><div><h3>{item.title}</h3><p>{item.detail}</p></div><span className="leadership-stat">{item.stat}</span></div>)}</div></div></section>
-      if (id === 'ai') return <section className="section ai-section" id="ai" key={id}><div className="container ai-layout"><div className="ai-symbol"><Sparkles size={44} strokeWidth={1.2}/><span>AI</span></div><div><div className="section-kicker"><span>{sectionNumber}</span><span className="kicker-line"/>In practice</div><h2>AI-assisted engineering</h2><p className="ai-intro">{content.ai.intro}</p><div className="ai-practices">{content.ai.practices.map(item => <div key={item}><Check size={16}/><span>{item}</span></div>)}</div></div></div></section>
-      if (id === 'skills') return <section className="section skills-section" id="skills" key={id}><div className="container"><SectionHead number={sectionNumber} kicker="The toolkit" title="Capabilities" intro="The technologies and practices behind the work."/><div className="skills-grid">{ordered(content.skillGroups, version.skillGroupIds).map((group, i) => <div className="skill-group" key={group.id}><div className="skill-group-heading"><span>0{i + 1}</span><h3>{group.title}</h3></div><div className="skill-tags">{group.items.map(item => <span key={item}>{item}</span>)}</div></div>)}</div></div></section>
+      if (id === 'work') return <section className="section work-section" id="work" tabIndex={-1} key={id}><div className="container"><SectionHead number={sectionNumber} kicker="Selected work" title="Systems built for the real world" intro="Selected professional projects and independent engineering work."/><div className={`case-list ${caseStudies.length === 4 ? 'case-list-balanced' : ''}`}>{caseStudies.map((item, index) => <article className={`case-card accent-${item.accent}`} key={item.id}><div className="case-number">0{index + 1} <span>/ 0{caseStudies.length}</span></div><div className="case-body"><div className="case-overline">{item.organization}<span>·</span>{item.category}</div><h3>{item.title}</h3><p>{item.description}</p><div className="case-tags">{item.technologies.slice(0, 4).map(t => <span key={t}>{t}</span>)}</div></div><button className="case-open" onClick={() => setSelectedCase(item.id)} aria-label={`Read ${item.title} case study`}><ArrowRight size={20}/></button></article>)}</div>{featured && <div className="work-note"><span className="note-symbol">✳</span><span>Featured perspective: <strong>{featured.title}</strong> — {featured.outcome}</span></div>}</div></section>
+      if (id === 'experience') return <section className="section experience-section" id="experience" tabIndex={-1} key={id}><div className="container"><SectionHead number={sectionNumber} kicker="Career journey" title="Experience" intro="From hands-on engineering to architecture and technical leadership."/><div className="timeline">{ordered(content.experiences, version.experienceIds).map((item, index) => <ExperienceRow item={item} key={item.id} index={index}/>)}</div></div></section>
+      if (id === 'leadership') return <section className="section leadership-section" id="leadership" tabIndex={-1} key={id}><div className="container leadership-layout"><div><SectionHead number={sectionNumber} kicker="Beyond the architecture" title="Leading through clarity and ownership" intro="Technical direction works best when teams have context, trust, and room to grow."/><div className="leadership-quote">Architecture, delivery, mentoring, and production ownership are connected parts of the work.</div></div><div className="leadership-list">{ordered(content.leadership, version.leadershipIds).map((item, i) => <div className="leadership-item" key={item.id}><span className="leadership-count">0{i + 1}</span><div><h3>{item.title}</h3><p>{item.detail}</p></div><span className="leadership-stat">{item.stat}</span></div>)}</div></div></section>
+      if (id === 'ai') return <section className="section ai-section" id="ai" key={id}><div className="container ai-layout"><div><div className="section-kicker"><span>{sectionNumber}</span><span className="kicker-line"/>In practice</div><h2>AI-assisted engineering</h2><h3 className="ai-practice-label">Astitva example</h3><p className="ai-intro">{content.ai.intro}</p><EngineeringDiagram title="People direct the process" caption="Human-directed workflow illustration." items={['Specifications', 'Assisted implementation', 'Human review'].map(label => ({ label }))}/><h3 className="ai-practice-label">General engineering practice</h3><div className="ai-practices">{content.ai.practices.map(item => <div key={item}><Check size={16}/><span>{item}</span></div>)}</div></div></div></section>
+      if (id === 'skills') return <section className="section skills-section" id="skills" tabIndex={-1} key={id}><div className="container"><SectionHead number={sectionNumber} kicker="The toolkit" title="Capabilities" intro="The technologies and practices behind the work."/><div className="skills-grid">{ordered(content.skillGroups, version.skillGroupIds).map((group, i) => <div className="skill-group" key={group.id}><div className="skill-group-heading"><span>0{i + 1}</span><h3>{group.title}</h3></div><div className="skill-tags">{group.items.map(item => <span key={item}>{item}</span>)}</div></div>)}</div></div></section>
       if (id === 'credentials') return <section className="section credentials-section" id="credentials" key={id}><div className="container"><SectionHead number={sectionNumber} kicker="Foundation" title="Education & credentials"/><div className="credential-grid">{content.credentials.map(item => <div className="credential-card" key={item.id}><div className="credential-icon"><ShieldCheck size={21}/></div><div><h3>{item.title}</h3><p>{item.institution}</p></div><span>{item.year}</span></div>)}</div></div></section>
       return null
     })}
@@ -163,9 +181,38 @@ function ExperienceRow({ item, index }: { item: Experience; index: number }) {
   return <article className={`experience-row ${open ? 'open' : ''}`}><div className="timeline-marker"><span/></div><div className="experience-period">{item.period}</div><div className="experience-main"><button className="experience-toggle" onClick={() => setOpen(!open)} aria-expanded={open}><span><strong>{item.role}</strong><small>{item.company}{item.client ? ` · ${item.client}` : ''}</small></span><ChevronDown size={19}/></button><p className="experience-summary">{item.summary}</p>{open && <div className="experience-details"><ul>{item.bullets.map((b, i) => <li key={i}>{b}</li>)}</ul><div className="experience-tags">{item.skills.map(s => <span key={s}>{s}</span>)}</div></div>}</div></article>
 }
 function CaseModal({ item, onClose }: { item?: CaseStudy; onClose: () => void }) {
-  useEffect(() => { const fn = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }; window.addEventListener('keydown', fn); document.body.style.overflow = 'hidden'; return () => { window.removeEventListener('keydown', fn); document.body.style.overflow = '' } }, [onClose])
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog || !item) return
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
+    dialog.showModal()
+    dialog.querySelector<HTMLButtonElement>('.modal-close')?.focus()
+    document.body.style.overflow = 'hidden'
+    return () => { dialog.close(); document.body.style.overflow = previousOverflow; opener?.focus() }
+  }, [item?.id])
   if (!item) return null
-  return <div className="modal-backdrop" onClick={onClose}><article className="case-modal" role="dialog" aria-modal="true" aria-label={`${item.title} case study`} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={onClose} aria-label="Close"><X size={21}/></button><div className="modal-overline">{item.organization} / {item.period}</div><h2>{item.title}</h2><p className="modal-lede">{item.description}</p><div className="modal-block"><span>THE CHALLENGE</span><p>{item.challenge}</p></div><div className="modal-block"><span>THE APPROACH</span><ul>{item.approach.map((point, i) => <li key={i}>{point}</li>)}</ul></div><div className="modal-block outcome"><span>THE OUTCOME</span><p>{item.outcome}</p></div><div className="case-tags">{item.technologies.map(t => <span key={t}>{t}</span>)}</div></article></div>
+  const personal = item.id === 'astitva'
+  return <dialog ref={dialogRef} className="case-modal" aria-labelledby="case-title" onKeyDown={event => {
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      const controls = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]') ?? []).filter(control => control.getClientRects().length > 0)
+      const current = controls.indexOf(document.activeElement as HTMLElement)
+      controls[(current + (event.shiftKey ? -1 : 1) + controls.length) % controls.length]?.focus()
+    }
+  }} onCancel={event => { event.preventDefault(); onClose() }} onClick={event => {
+    if (event.target !== event.currentTarget) return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose()
+  }}><button className="modal-close" onClick={onClose} aria-label="Close" autoFocus><X size={21}/></button><div className="modal-overline">{item.organization} / {item.period}</div><h2 id="case-title">{item.title}</h2><p className="modal-lede">{item.description}</p><div className="modal-block"><span>{personal ? 'PROJECT CONTEXT' : 'THE CHALLENGE'}</span><p>{item.challenge}</p></div>{personal ? <EngineeringDiagram title="Engineering themes" caption="Six themes from this independent personal project." themes items={[
+    { label: 'Workspace', detail: item.description },
+    { label: 'Finance integration', detail: item.approach[0] },
+    { label: 'Daily priorities', detail: item.approach[1] },
+    { label: 'Protected chat', detail: item.approach[2] },
+    { label: 'Human-directed Codex workflow', detail: item.approach[3] },
+    { label: 'Family sharing', detail: item.outcome }
+  ]}/> : <><div className="modal-block"><span>THE APPROACH</span><ul>{item.approach.map((point, i) => <li key={i}>{point}</li>)}</ul></div><div className="modal-block outcome"><span>THE OUTCOME</span><p>{item.outcome}</p></div></>}<div className="case-tags">{item.technologies.map(t => <span key={t}>{t}</span>)}</div></dialog>
 }
 
 type CollectionName = 'achievements' | 'experiences' | 'caseStudies' | 'leadership' | 'skillGroups' | 'credentials'

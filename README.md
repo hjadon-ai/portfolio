@@ -13,6 +13,14 @@ Open the local URL printed by Vite (usually `http://127.0.0.1:5173/`). `npm run 
 
 The public copy is deployed to Firebase Hosting at `https://harendra-play.web.app/`. The Astitva link points to `https://astitva-live.web.app/`. To redeploy after editing the bundled JSON, run `npm run build` followed by `firebase deploy --only hosting --project harendra-play`.
 
+## GitHub Actions deployment
+
+`.github/workflows/firebase-hosting.yml` builds and deploys the portfolio to the live Firebase Hosting site in project `harendra-play` on pushes to `main`. You can also select **Actions → Deploy portfolio to Firebase Hosting → Run workflow** using the `main` branch. Manual runs on other branches are skipped.
+
+Before the first deployment, configure the repository Actions secret `FIREBASE_SERVICE_ACCOUNT_HARENDRA_PLAY` with a Firebase deployment service account JSON key authorized for the `harendra-play` project. Keep the key in GitHub Secrets; do not commit it. Firebase documents setup at https://firebase.google.com/docs/hosting/github-integration.
+
+The workflow runs `npm ci` and `npm run build`, then deploys only Hosting using the existing `firebase.json` configuration and `dist` output. It does not deploy Astitva or include the local content editor. A deployment failure does not imply a successful site update; check the Actions run before treating a change as published.
+
 ## Edit content
 
 1. Run the app locally with `npm run dev`, then open **Edit content** in the header. The first time, set a passphrase of at least 12 characters in your own browser. Later visits require that passphrase again.
