@@ -4,6 +4,7 @@ import App from './App'
 import './fonts.css'
 import './styles.css'
 import './editor-extras.css'
+import './visual-clarity.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>,
