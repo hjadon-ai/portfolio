@@ -8,8 +8,10 @@ Portfolio uses its own feature ID sequence; these IDs do not refer to Astitva fe
 | [F002](ui/F002-case-study-presentation.md) | Clearer case-study and AI practice presentation | UI | Done |
 | [F003](editor/F003-browser-draft-awareness.md) | Browser draft and bundled-content awareness | Editor | Proposed |
 | [F004](ui/F004-visual-clarity-and-animated-diagrams.md) | Visual clarity, refreshed colors, and animated diagrams | UI | Done |
+| [F005](ui/F005-public-astitva-overview.md) | Public Astitva engineering overview | UI | Done |
+| [F006](ui/F006-astitva-architecture-animation.md) | Astitva architecture illustration | UI | Done |
 
-F001, F002, and F004 are implemented. F003 remains Proposed.
+F001, F002, F004, F005, and F006 are implemented. F003 remains Proposed.
 
 These proposals follow Astitva's feature-document structure. Approval is separate from implementation. Implement only explicitly approved IDs; mark Done only after implementation and relevant verification. Done does not mean pushed, merged, or deployed. The existing active branch is `feature/portfolio-astitva-favicons`; no new implementation branch was created for this review.
 
